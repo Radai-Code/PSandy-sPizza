@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sandy's Pizzas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../src/css/admin/dashboard.css">
+    <link rel="icon" type="image/png" href="../../src/imagenes/logo.png">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../../src/imagenes/logo.png" alt="Logo">
+                <span>Sandy's Pizzas</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">Productos</a>
+                <a href="#" class="nav-item">Pedidos</a>
+                <a href="#" class="nav-item">Clientes</a>
+                <a href="#" class="nav-item">Reportes</a>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="main-header">
+                <h2>Panel de Administración</h2>
+                <a href="#" class="logout-btn">Cerrar Sesión</a>
+            </header>
+
+            <main class="content-area">
+                <div class="content-header">
+                    <h3>Gestión de Productos</h3>
+                    <button class="btn-primary">＋ Agregar Nuevo Producto</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><img src="https://via.placeholder.com/60" alt="Pizza" class="product-thumb"></td>
+                                <td>Pizza de Peperoni</td>
+                                <td>Pizzas</td>
+                                <td>$150.00</td>
+                                <td>
+                                    <button class="btn-action btn-edit">Editar</button>
+                                    <button class="btn-action btn-delete">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><img src="https://via.placeholder.com/60" alt="Hamburguesa" class="product-thumb">
+                                </td>
+                                <td>Hamburguesa Clásica</td>
+                                <td>Hamburguesas</td>
+                                <td>$120.00</td>
+                                <td>
+                                    <button class="btn-action btn-edit">Editar</button>
+                                    <button class="btn-action btn-delete">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
