@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - Sandy's Pizzas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../src/css/carrito.css">
+    <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
+</head>
+
+<body>
+    <header class="menu-header">
+        <a href="index.html" class="brand-logo">Sandy's Pizzas</a>
+        <nav class="main-nav">
+            <a href="menu.html" class="menu-link">Menú</a>
+            <a href="login.html" class="login-link">Iniciar Sesión</a>
+        </nav>
+    </header>
+
+    <main class="cart-container">
+        <h1>Tu Carrito de Compras</h1>
+
+        <div class="cart-wrapper">
+            <section class="cart-items">
+                <div class="cart-item">
+                    <img src="https://via.placeholder.com/100" alt="Pizza de Peperoni" class="item-image">
+                    <div class="item-details">
+                        <h2>Pizza de Peperoni</h2>
+                        <p class="item-price">$150.00</p>
+                        <button class="remove-btn">Eliminar</button>
+                    </div>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn">-</button>
+                        <span class="quantity">1</span>
+                        <button class="quantity-btn">+</button>
+                    </div>
+                </div>
+
+                <div class="cart-item">
+                    <img src="https://via.placeholder.com/100" alt="Refresco" class="item-image">
+                    <div class="item-details">
+                        <h2>Refresco de Cola</h2>
+                        <p class="item-price">$30.00</p>
+                        <button class="remove-btn">Eliminar</button>
+                    </div>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn">-</button>
+                        <span class="quantity">2</span>
+                        <button class="quantity-btn">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="order-summary">
+                <h2>Resumen del Pedido</h2>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>$210.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span>$40.00</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span>$250.00</span>
+                </div>
+                <button class="checkout-btn">Proceder al Pago</button>
+                <a href="menu.html" class="continue-shopping">o Seguir Comprando</a>
+            </aside>
+        </div>
+    </main>
+</body>
+
+</html>
