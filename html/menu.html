@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - Sandy's Pizzas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../src/css/menu.css">
+</head>
+
+<body>
+
+    <header class="menu-header">
+        <a href="index.html" class="brand-logo">Sandy's Pizzas</a>
+        <nav class="main-nav">
+            <a href="carrito.html" class="cart-link">🛒 Mi Carrito</a>
+            <a href="login.html" class="login-link">Iniciar Sesión</a>
+        </nav>
+    </header>
+
+    <main class="menu-container">
+        <h1 class="main-title">Nuestro Menú</h1>
+
+        <div class="category-filters">
+            <button class="filter-btn active" data-filter="todos">Todos</button>
+            <button class="filter-btn" data-filter="pizzas">Pizzas</button>
+            <button class="filter-btn" data-filter="bebidas">Bebidas</button>
+            <button class="filter-btn" data-filter="combos">Combos</button>
+            <button class="filter-btn" data-filter="hamburguesas">Hamburguesas</button>
+            <button class="filter-btn" data-filter="espaguetis">Espaguetis</button>
+        </div>
+
+        <div class="product-grid">
+
+            <div class="product-card" data-category="pizzas">
+                <img src="" alt="Pizza de Peperoni" class="product-image">
+                <div class="product-info">
+                    <h2>Pizza de Peperoni</h2>
+                    <p>La clásica que nunca falla, con extra queso y peperoni de primera.</p>
+                    <span class="price">$150.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+            <div class="product-card" data-category="pizzas">
+                <img src="" alt="Pizza Hawaiana" class="product-image">
+                <div class="product-info">
+                    <h2>Pizza Hawaiana</h2>
+                    <p>La controversial pero deliciosa combinación de jamón y piña.</p>
+                    <span class="price">$160.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card" data-category="bebidas">
+                <img src="" alt="Refresco de Cola" class="product-image">
+                <div class="product-info">
+                    <h2>Refresco de Cola</h2>
+                    <p>Refresco de 600ml bien frío para acompañar tu comida.</p>
+                    <span class="price">$30.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card" data-category="combos">
+                <img src="" alt="Combo Pareja" class="product-image">
+                <div class="product-info">
+                    <h2>Combo Pareja</h2>
+                    <p>1 Pizza grande de peperoni + 2 refrescos de 600ml.</p>
+                    <span class="price">$190.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card" data-category="hamburguesas">
+                <img src="" alt="Hamburguesa Clásica" class="product-image">
+                <div class="product-info">
+                    <h2>Hamburguesa Clásica</h2>
+                    <p>Carne jugosa, queso cheddar, lechuga, tomate y nuestra salsa especial.</p>
+                    <span class="price">$120.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+
+            <div class="product-card" data-category="espaguetis">
+                <img src="" alt="Espagueti a la Boloñesa" class="product-image">
+                <div class="product-info">
+                    <h2>Espagueti a la Boloñesa</h2>
+                    <p>Pasta fresca con nuestra tradicional salsa de carne y tomate.</p>
+                    <span class="price">$110.00</span>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../js/menu.js"></script>
+</body>
+
+</html>

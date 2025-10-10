@@ -1,0 +1,188 @@
+/* ======== ESTILOS GENERALES ======== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    /* Fondo gris muy claro para la página */
+}
+
+/* ======== ENCABEZADO Y NAVEGACIÓN ======== */
+.menu-header {
+    background-color: #006d3b;
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.brand-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.cart-link,
+.login-link {
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    /* Pequeña animación */
+}
+
+.cart-link {
+    background-color: #ffcc00;
+    color: #000;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+}
+
+.login-link {
+    color: #fff;
+}
+
+.cart-link:hover,
+.login-link:hover {
+    transform: translateY(-2px);
+    /* Pequeña animación de elevación */
+    opacity: 0.9;
+}
+
+/* ======== CONTENIDO PRINCIPAL ======== */
+.menu-container {
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+}
+
+.main-title {
+    text-align: center;
+    font-size: 3rem;
+    color: #006d3b;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+/* ======== FILTROS DE CATEGORÍA CON ANIMACIÓN ======== */
+.category-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.filter-btn {
+    background-color: #fff;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    padding: 0.7rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    /* La clave de la animación */
+}
+
+.filter-btn:hover {
+    transform: translateY(-3px);
+    /* Animación de elevación */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn.active {
+    background-color: #006d3b;
+    color: #fff;
+    border-color: #ffcc00;
+}
+
+/* ======== GRID DE PRODUCTOS ======== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* Grid responsivo */
+    gap: 2rem;
+    justify-items: center;
+}
+
+/* ======== TARJETA DE PRODUCTO CON ANIMACIÓN ======== */
+.product-card {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    /* La clave de la animación */
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    /* Animación de elevación más pronunciada */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 1.5rem;
+    flex-grow: 1;
+    /* Empuja el botón hacia abajo */
+    display: flex;
+    flex-direction: column;
+}
+
+.product-info h2 {
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.product-info p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0.5rem 0 1rem;
+    flex-grow: 1;
+}
+
+.price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #006d3b;
+}
+
+.add-to-cart-btn {
+    background-color: #ffcc00;
+    color: #000;
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    /* Animación de color */
+}
+
+.add-to-cart-btn:hover {
+    background-color: #ffb300;
+}

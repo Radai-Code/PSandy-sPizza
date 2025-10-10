@@ -1,0 +1,239 @@
+/* ======== ESTILOS GENERALES ======== */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6;
+    /* Fondo gris claro y profesional */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* ======== CONTENEDOR DEL FORMULARIO ======== */
+.admin-container {
+    background-color: #fff;
+    padding: 2.5rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border-top: 5px solid #006d3b;
+    /* Acento de color de la marca */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.admin-form h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.title-icon {
+    width: 24px;
+    height: 24px;
+    color: #006d3b;
+}
+
+.form-logo img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+}
+
+/* ======== GRUPOS DE INPUTS ======== */
+.input-group {
+    margin-bottom: 1.2rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #006d3b;
+    /* Borde verde al seleccionar */
+    box-shadow: 0 0 0 3px rgba(0, 109, 59, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+/* ======== BOTÓN Y ENLACE DE AYUDA ======== */
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #006d3b;
+    /* Botón en color verde primario */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.submit-btn:hover {
+    background-color: #005a2e;
+    transform: translateY(-2px);
+}
+
+.back-link {
+    color: #666;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* ======== ANIMACIÓN DE ENTRADA ======== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ======== ESTILOS GENERALES ======== */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6;
+    /* Fondo gris claro y profesional */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* ======== CONTENEDOR DEL FORMULARIO ======== */
+.admin-container {
+    background-color: #fff;
+    padding: 2.5rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border-top: 5px solid #006d3b;
+    /* Acento de color de la marca */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.admin-form h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.title-icon {
+    width: 24px;
+    height: 24px;
+    color: #006d3b;
+}
+
+.form-logo img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+}
+
+/* ======== GRUPOS DE INPUTS ======== */
+.input-group {
+    margin-bottom: 1.2rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #006d3b;
+    /* Borde verde al seleccionar */
+    box-shadow: 0 0 0 3px rgba(0, 109, 59, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+/* ======== BOTÓN Y ENLACE DE AYUDA ======== */
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #006d3b;
+    /* Botón en color verde primario */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.submit-btn:hover {
+    background-color: #005a2e;
+    transform: translateY(-2px);
+}
+
+.back-link {
+    color: #666;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* ======== ANIMACIÓN DE ENTRADA ======== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

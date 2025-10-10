@@ -1,0 +1,163 @@
+/* ======== ESTILOS GENERALES ======== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    overflow: hidden;
+    /* Evita el scroll */
+}
+
+/* ======== CONTENEDOR PRINCIPAL (PANTALLA DIVIDIDA) ======== */
+.login-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ======== PANEL IZQUIERDO (IMAGEN) ======== */
+.image-panel {
+    flex: 1.2;
+    background: linear-gradient(rgba(0, 109, 59, 0.6), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=1928') no-repeat center center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+}
+
+.image-overlay h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+}
+
+/* ======== PANEL DERECHO (FORMULARIO) ======== */
+.form-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: #fff;
+    overflow-y: auto;
+    /* Permite scroll si el formulario es muy largo */
+}
+
+.form-content {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.form-content h1 {
+    font-size: 2.2rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+/* ======== GRUPOS DE INPUTS MODERNOS ======== */
+.input-group {
+    margin-bottom: 1rem;
+    /* Un poco menos de espacio para que quepan más campos */
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 2px solid #e0e0e0;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #ffcc00;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+/* ======== BOTÓN Y ENLACES DE AYUDA ======== */
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #006d3b;
+    /* Botón de registro en verde */
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 109, 59, 0.3);
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.submit-btn:hover {
+    background-color: #005a2e;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 109, 59, 0.4);
+}
+
+.helper-links p {
+    color: #666;
+    margin: 0.5rem 0;
+}
+
+.helper-links a {
+    color: #006d3b;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.helper-links a:hover {
+    text-decoration: underline;
+}
+
+/* ======== ANIMACIÓN DE ENTRADA ======== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ======== RESPONSIVO (para móviles) ======== */
+@media (max-width: 768px) {
+    .login-wrapper {
+        flex-direction: column;
+    }
+
+    .image-panel {
+        display: none;
+    }
+
+    .form-panel {
+        /* Permite que ocupe toda la altura en móviles */
+        height: 100vh;
+    }
+}
