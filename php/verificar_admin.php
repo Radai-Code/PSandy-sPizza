@@ -1,20 +1,21 @@
 <?php
-// 1. Incluir el archivo de conexión.
-// require_once se asegura de que el archivo se incluya una sola vez.
-// ¡Esta línea hace todo el trabajo de conexión por nosotros!
-require_once 'conexion.php';
+// Habilitar la visualización de errores para depuración
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// Incluir el archivo de conexión.
+// La ruta es '../' porque 'conexion.php' está un nivel arriba de la carpeta 'php'.
+require_once '../conexion.php'; 
 
 // Iniciar una sesión para el usuario.
 session_start();
 
-
-// 2. Obtener los datos que el usuario envió desde el formulario
+// Obtener los datos que el usuario envió desde el formulario
 $usuario_form = $_POST['username'];
 $contrasena_form = $_POST['password'];
 
-// 3. Preparar la consulta SQL para buscar al administrador
+// Preparar la consulta SQL
 $sql = "SELECT id, usuario, contrasena FROM administradores WHERE usuario = ?";
-
 $stmt = mysqli_prepare($conexion, $sql);
 
 if (!$stmt) {
@@ -22,12 +23,9 @@ if (!$stmt) {
 }
 
 mysqli_stmt_bind_param($stmt, "s", $usuario_form);
-
-// 4. Ejecutar la consulta
 mysqli_stmt_execute($stmt);
 $resultado = mysqli_stmt_get_result($stmt);
 
-// 5. Verificar el resultado
 if ($fila = mysqli_fetch_assoc($resultado)) {
     // Si se encontró un usuario, verificamos la contraseña
     if (password_verify($contrasena_form, $fila['contrasena'])) {
@@ -37,19 +35,21 @@ if ($fila = mysqli_fetch_assoc($resultado)) {
         $_SESSION['admin_usuario'] = $fila['usuario'];
         
         // Redirigir al panel de administración
-        header("Location: html/admin/dashboard.html");
+        header("Location: ../html/admin/dashboard.html");
         exit();
 
     } else {
-        // Contraseña incorrecta
-        echo "Error: Usuario o contraseña incorrectos.";
+        // Contraseña incorrecta, redirigir con error al archivo .php
+        header("Location: ../html/admin/login-admin.php?error=1");
+        exit();
     }
 } else {
-    // No se encontró el usuario
-    echo "Error: Usuario o contraseña incorrectos.";
+    // No se encontró el usuario, redirigir con error al archivo .php
+    header("Location: ../html/admin/login-admin.php?error=1");
+    exit();
 }
 
-// 6. Cerrar las conexiones
+// Cerrar las conexiones
 mysqli_stmt_close($stmt);
 mysqli_close($conexion);
 ?>
