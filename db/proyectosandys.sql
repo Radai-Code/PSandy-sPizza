@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-10-2025 a las 06:35:25
+-- Tiempo de generación: 11-10-2025 a las 07:50:06
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -71,7 +71,8 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id_cliente`, `nombre`, `telefono`, `calle`, `colonia`, `email`, `contrasena`) VALUES
-(1, 'kevin', '555-1234', 'Calle Falsa 123', 'Centro', 'kevin@gmail.com', 'cliente123');
+(1, 'kevin', '555-1234', 'Calle Falsa 123', 'Centro', 'kevin@gmail.com', 'cliente123'),
+(3, 'Karen', NULL, NULL, NULL, 'karen@ejemplo.com', 'karen123');
 
 -- --------------------------------------------------------
 
@@ -324,7 +325,7 @@ ALTER TABLE `clasificacion`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
