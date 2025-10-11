@@ -27,7 +27,8 @@
                 <h1>Acceso Cliente</h1>
                 <p class="subtitle">Ingresa tus credenciales para continuar</p>
 
-                <form class="login-form">
+                <form class="login-form" action="../php/verificar_cliente.php" method="post">
+
                     <div class="input-group">
                         <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="currentColor">
@@ -48,14 +49,15 @@
                         <input type="password" id="password" name="password" placeholder="Contraseña" required>
                     </div>
 
-                    <button type="submit" class="submit-btn">Iniciar Sesión</button>
                     <div class="forgot-password">
                         <a href="recuperarContrasenia.html">¿Olvidaste tu contraseña?</a>
                     </div>
+
+                    <button type="submit" class="submit-btn">Iniciar Sesión</button>
+
                 </form>
 
                 <div class="helper-links">
-
                     <p><a href="login.html">Volver a la selección</a></p>
                 </div>
             </div>

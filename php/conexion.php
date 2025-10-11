@@ -1,5 +1,4 @@
 <?php
-// Habilitar la visualización de errores solo durante el desarrollo
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -11,7 +10,7 @@ $nombre_db = 'ProyectoSandys';
 // Crear la conexión con la base de datos
 $conexion = mysqli_connect($servidor, $usuario_db, $contrasena_db, $nombre_db);
 
-// Verificar si la conexión falló y detener la ejecución si es así
+// Verificar si la conexión falló
 if (!$conexion) {
     die("Error fatal de conexión: " . mysqli_connect_error());
 }

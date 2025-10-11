@@ -186,3 +186,22 @@ body {
 .add-to-cart-btn:hover {
     background-color: #ffb300;
 }
+
+/* Estilo para Perfil de Usuario (Sesión Iniciada) */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.user-profile span {
+    color: #fff;
+    font-weight: 600;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ffcc00;
+}

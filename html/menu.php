@@ -1,3 +1,7 @@
+<?php
+// 1. Iniciar la sesión. ESTO DEBE SER LO PRIMERO EN EL ARCHIVO.
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -11,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="../src/css/menu.css">
+    <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
 </head>
 
 <body>
@@ -19,8 +24,22 @@
         <a href="index.html" class="brand-logo">Sandy's Pizzas</a>
         <nav class="main-nav">
             <a href="carrito.html" class="cart-link">🛒 Mi Carrito</a>
-            <a href="login.html" class="login-link">Iniciar Sesión</a>
-        </nav>
+            
+            <?php if (isset($_SESSION['user_id'])): ?>
+                
+                <div class="user-profile">
+        <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
+        <img src="../src/imagenes/icons/cliente.png" alt="Perfil">
+    </div>
+    <a href="../php/logout_cliente.php" class="login-link">Cerrar Sesión</a>
+
+
+            <?php else: ?>
+                
+                <a href="login.html" class="login-link">Iniciar Sesión</a>
+
+            <?php endif; ?>
+            </nav>
     </header>
 
     <main class="menu-container">
@@ -46,6 +65,7 @@
                 </div>
                 <button class="add-to-cart-btn">Agregar al Carrito</button>
             </div>
+            
             <div class="product-card" data-category="pizzas">
                 <img src="" alt="Pizza Hawaiana" class="product-image">
                 <div class="product-info">
@@ -65,41 +85,9 @@
                 </div>
                 <button class="add-to-cart-btn">Agregar al Carrito</button>
             </div>
-
-            <div class="product-card" data-category="combos">
-                <img src="" alt="Combo Pareja" class="product-image">
-                <div class="product-info">
-                    <h2>Combo Pareja</h2>
-                    <p>1 Pizza grande de peperoni + 2 refrescos de 600ml.</p>
-                    <span class="price">$190.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
             </div>
-
-            <div class="product-card" data-category="hamburguesas">
-                <img src="" alt="Hamburguesa Clásica" class="product-image">
-                <div class="product-info">
-                    <h2>Hamburguesa Clásica</h2>
-                    <p>Carne jugosa, queso cheddar, lechuga, tomate y nuestra salsa especial.</p>
-                    <span class="price">$120.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
-            </div>
-
-            <div class="product-card" data-category="espaguetis">
-                <img src="" alt="Espagueti a la Boloñesa" class="product-image">
-                <div class="product-info">
-                    <h2>Espagueti a la Boloñesa</h2>
-                    <p>Pasta fresca con nuestra tradicional salsa de carne y tomate.</p>
-                    <span class="price">$110.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
-            </div>
-
-        </div>
     </main>
 
     <script src="../js/menu.js"></script>
 </body>
-
 </html>
