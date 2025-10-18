@@ -28,11 +28,10 @@ session_start();
             <?php if (isset($_SESSION['user_id'])): ?>
                 
                 <div class="user-profile">
-        <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
-        <img src="../src/imagenes/icons/cliente.png" alt="Perfil">
-    </div>
-    <a href="../php/logout_cliente.php" class="login-link">Cerrar Sesión</a>
-
+                    <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
+                    <img src="../src/imagenes/icons/cliente.png" alt="Perfil">
+                </div>
+                <a href="../php/logout_cliente.php" class="login-link">Cerrar Sesión</a>
 
             <?php else: ?>
                 

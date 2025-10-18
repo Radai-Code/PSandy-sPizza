@@ -23,8 +23,8 @@ mysqli_stmt_execute($stmt);
 $resultado = mysqli_stmt_get_result($stmt);
 
 if ($fila = mysqli_fetch_assoc($resultado)) {
-    // ===== CAMBIO IMPORTANTE AQUÍ =====
-    // Comparamos directamente la contraseña del formulario con la de la base de datos.
+    // ===== CAMBIO CRÍTICO AQUÍ =====
+    // Comparamos directamente la contraseña del formulario con la de la base de datos (texto plano vs. texto plano).
     if ($contrasena_form === $fila['contrasena']) {
         
         // ¡Login exitoso!
