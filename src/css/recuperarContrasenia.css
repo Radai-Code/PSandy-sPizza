@@ -19,6 +19,7 @@ body {
 .image-panel {
     flex: 1.2;
     background: linear-gradient(rgba(0, 109, 59, 0.6), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=2069') no-repeat center center/cover;
+    /* Reemplaza con tu imagen */
 }
 
 .form-panel {
@@ -50,6 +51,7 @@ body {
     font-size: 2.2rem;
     color: #333;
     font-weight: 700;
+    margin-bottom: 0.5rem;
 }
 
 .subtitle {
@@ -76,6 +78,7 @@ body {
 .input-group input {
     width: 100%;
     padding: 1rem 1rem 1rem 3rem;
+    /* Padding izquierdo para icono si lo usas */
     border: 2px solid #e0e0e0;
     background-color: #f8f9fa;
     border-radius: 12px;
@@ -119,6 +122,7 @@ body {
     color: #006d3b;
     font-weight: 600;
     text-decoration: none;
+    font-size: 0.9rem;
 }
 
 .helper-links a:hover {
@@ -146,4 +150,26 @@ body {
     .image-panel {
         display: none;
     }
+
+    .form-panel {
+        height: 100vh;
+    }
+}
+
+/* ===== Mensajes de Error/Éxito (Opcional, para ?error=... en URL) ===== */
+.message {
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
 }
