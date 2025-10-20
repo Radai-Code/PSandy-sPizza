@@ -35,8 +35,10 @@
                     <div class="input-group">
                         <input type="text" name="apellidos" placeholder="Apellidos" required>
                     </div>
+
                     <div class="input-group">
-                        <input type="tel" name="telefono" placeholder="Número de Teléfono" required>
+                        <input type="tel" name="telefono" placeholder="Número de Teléfono (10 dígitos)" required
+                            maxlength="10" pattern="[0-9]{10}" title="Por favor, ingresa 10 dígitos numéricos.">
                     </div>
                     <div class="input-group">
                         <input type="text" name="calle" placeholder="Calle y Número" required>
