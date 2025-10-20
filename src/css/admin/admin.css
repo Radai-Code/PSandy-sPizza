@@ -237,3 +237,27 @@ body {
         transform: translateY(0);
     }
 }
+
+/* ===== ESTILO PARA 'OLVIDÉ MI CONTRASEÑA' ===== */
+.forgot-password {
+    text-align: right;
+    /* Alinea el enlace a la derecha */
+    margin-top: -0.8rem;
+    /* Sube un poco */
+    margin-bottom: 1.5rem;
+    /* Espacio antes del siguiente elemento */
+}
+
+.forgot-password a {
+    color: #666;
+    /* Color gris */
+    font-size: 0.9rem;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.forgot-password a:hover {
+    color: #006d3b;
+    /* Color verde al pasar el mouse */
+    text-decoration: underline;
+}
