@@ -180,3 +180,11 @@ th {
     background-color: #ffebee;
     color: #c62828;
 }
+
+/* Add this style for the 'Visualizar' button */
+.btn-view {
+    background-color: #e3f2fd;
+    /* Light blue */
+    color: #1565c0;
+    /* Dark blue */
+}

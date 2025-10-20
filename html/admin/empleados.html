@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sandy's Pizzas</title>
+    <title>Gestión Empleados - Sandy's Pizzas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,10 +19,9 @@
                 <img src="../../src/imagenes/logo.png" alt="Logo">
                 <span>Sandy's Pizzas</span>
             </div>
-
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">Productos</a> <a href="empleados.html"
-                    class="nav-item">Empleados</a>
+                <a href="dashboard.html" class="nav-item">Productos</a>
+                <a href="empleados.html" class="nav-item active">Empleados</a>
                 <a href="#" class="nav-item">Pedidos</a>
                 <a href="#" class="nav-item">Clientes</a>
                 <a href="#" class="nav-item">Reportes</a>
@@ -37,8 +36,8 @@
 
             <main class="content-area">
                 <div class="content-header">
-                    <h3>Gestión de Productos</h3>
-                    <button class="btn-primary">＋ Agregar Nuevo Producto</button>
+                    <h3>Gestión de Empleados</h3>
+                    <button class="btn-primary">＋ Registrar Nuevo Empleado</button>
                 </div>
 
                 <div class="table-container">
@@ -46,34 +45,23 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Imagen</th>
                                 <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
+                                <th>Apellidos</th>
+                                <th>Email</th>
+                                <th>Rol</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>1</td>
-                                <td><img src="https://via.placeholder.com/60" alt="Pizza" class="product-thumb"></td>
-                                <td>Pizza de Peperoni</td>
-                                <td>Pizzas</td>
-                                <td>$150.00</td>
+                                <td>3</td>
+                                <td>Mareli</td>
+                                <td>Admin</td>
+                                <td>mareli@gmail.com</td>
+                                <td>admin</td>
                                 <td>
-                                    <button class="btn-action btn-edit">Editar</button>
-                                    <button class="btn-action btn-delete">Eliminar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><img src="https://via.placeholder.com/60" alt="Hamburguesa" class="product-thumb">
-                                </td>
-                                <td>Hamburguesa Clásica</td>
-                                <td>Hamburguesas</td>
-                                <td>$120.00</td>
-                                <td>
-                                    <button class="btn-action btn-edit">Editar</button>
+                                    <button class="btn-action btn-edit">Actualizar</button>
+                                    <button class="btn-action btn-view">Visualizar</button>
                                     <button class="btn-action btn-delete">Eliminar</button>
                                 </td>
                             </tr>
