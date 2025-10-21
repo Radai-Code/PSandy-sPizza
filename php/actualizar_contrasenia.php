@@ -9,13 +9,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validar campos vacíos
     if (empty($email) || empty($nueva_contrasena) || empty($confirmar_contrasena)) {
-        header("Location: ../html/recuperarContrasenia.php?error=campos_vacios&type=$user_type");
+        header("Location: ../html/Recuperar_Contrasenia.php?error=campos_vacios&type=$user_type");
         exit();
     }
 
     // Validar coincidencia de contraseñas
     if ($nueva_contrasena !== $confirmar_contrasena) {
-        header("Location: ../html/recuperarContrasenia.php?error=no_coinciden&type=$user_type");
+        header("Location: ../html/Recuperar_Contrasenia.php?error=no_coinciden&type=$user_type");
         exit();
     }
 
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: ../html/login.html?restablecido=1&type=$user_type");
         exit();
     } else {
-        header("Location: ../html/recuperarContrasenia.php?error=no_encontrado&type=$user_type");
+        header("Location: ../html/Recuperar_Contrasenia.php?error=no_encontrado&type=$user_type");
         exit();
     }
 

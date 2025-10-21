@@ -35,7 +35,7 @@ session_start();
 
             <?php else: ?>
                 
-                <a href="login.html" class="login-link">Iniciar Sesión</a>
+                <a href="login.html" class="login-link">cerrar Sesión</a>
 
             <?php endif; ?>
             </nav>

@@ -42,13 +42,13 @@ $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
 <?php endif; ?>
 
 
-<form class="login-form" action="   /PSandy-sPizza/php/verificar_email.php" method="post">
-    <input type="hidden" name="user_type" value="<?php echo $user_type; ?>">
-    <div class="input-group">
-        <input type="email" name="email" placeholder="Correo Electrónico" required>
-    </div>
-    <button type="submit" class="submit-btn">Verificar</button>
+<form action="/PSandy-sPizza/php/verificar_cliente.php" method="post">
+    <input type="email" name="email" placeholder="Correo" required>
+    <input type="hidden" name="user_type" value="client">
+    <button type="submit">Enviar</button>
 </form>
+
+
 
                 <div class="helper-links">
                     <?php if ($user_type === 'admin'): ?>
