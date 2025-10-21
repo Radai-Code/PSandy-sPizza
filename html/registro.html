@@ -26,8 +26,7 @@
                 </a>
                 <h1>Crea tu Cuenta</h1>
                 <p class="subtitle">Regístrate para una experiencia personalizada.</p>
-
-                <form class="login-form" action="../php/procesar_registro.php" method="post">
+                <form class="login-form" action="../php/procesar_registro.php" method="post" id="registro-form">
 
                     <div class="input-group">
                         <input type="text" name="nombre" placeholder="Nombre(s)" required>
@@ -40,6 +39,7 @@
                         <input type="tel" name="telefono" placeholder="Número de Teléfono (10 dígitos)" required
                             maxlength="10" pattern="[0-9]{10}" title="Por favor, ingresa 10 dígitos numéricos.">
                     </div>
+
                     <div class="input-group">
                         <input type="text" name="calle" placeholder="Calle y Número" required>
                     </div>
@@ -49,15 +49,23 @@
                     <div class="input-group">
                         <input type="number" name="codigo_postal" placeholder="Código Postal" required>
                     </div>
+
                     <div class="input-group">
                         <input type="email" name="email" placeholder="Correo Electrónico" required>
                     </div>
+
                     <div class="input-group">
                         <input type="password" name="contrasena" placeholder="Crear Contraseña" required>
                     </div>
+                    <div class="input-group">
+                        <input type="password" name="confirm_contrasena" placeholder="Confirmar Contraseña" required>
+                    </div>
+
+                    <p id="error-message" style="color:red; text-align:center;"></p>
 
                     <button type="submit" class="submit-btn">Registrarse</button>
                 </form>
+
 
                 <div class="helper-links">
                     <p>¿Ya tienes una cuenta? <a href="client-login.html">Inicia Sesión</a></p>
@@ -66,6 +74,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const errorMsg = document.getElementById('error-message');
+
+        if (params.has('error')) {
+            const error = params.get('error');
+            switch (error) {
+                case '1': errorMsg.textContent = "Todos los campos son obligatorios"; break;
+                case '2': errorMsg.textContent = "Teléfono debe tener 10 dígitos"; break;
+                case '3': errorMsg.textContent = "Las contraseñas no coinciden"; break;
+                case '4': errorMsg.textContent = "Correo ya registrado"; break;
+                case '5': errorMsg.textContent = "Error al registrar usuario"; break;
+            }
+        }
+
+        if (params.has('success')) {
+            alert("Registro exitoso, ahora puedes iniciar sesión");
+        }
+    </script>
+
 </body>
 
 </html>
