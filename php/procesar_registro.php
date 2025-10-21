@@ -1,66 +1,67 @@
 <?php
-require_once 'conexion.php';
-session_start();
+include 'conexion.php';
 
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-    exit("Acceso no permitido");
-}
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitizar datos
+    $nombre = trim($_POST["nombre"]);
+    $apellidos = trim($_POST["apellidos"]);
+    $telefono = trim($_POST["telefono"]);
+    $calle = trim($_POST["calle"]);
+    $colonia = trim($_POST["colonia"]);
+    $codigo_postal = trim($_POST["codigo_postal"]);
+    $email = trim($_POST["email"]);
+    $contrasena = $_POST["contrasena"];
+    $confirmar_contrasena = $_POST["confirmar_contrasena"];
 
-// =================== RECIBIR DATOS ===================
-$nombre = trim($_POST['nombre']);
-$apellidos = trim($_POST['apellidos']);
-$telefono = trim($_POST['telefono']);
-$calle = trim($_POST['calle']);
-$colonia = trim($_POST['colonia']);
-$codigo_postal = trim($_POST['codigo_postal']);
-$email = trim($_POST['email']);
-$contrasena = $_POST['contrasena'];
-$confirm_contrasena = $_POST['confirm_contrasena'];
+    // Validaciones
+    if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($calle) || 
+        empty($colonia) || empty($codigo_postal) || empty($email) || empty($contrasena) || empty($confirmar_contrasena)) {
+        header("Location: ../html/registro_cliente.html?error=campos_vacios");
+        exit();
+    }
 
-// =================== VALIDACIONES ===================
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: ../html/registro_cliente.html?error=email_invalido");
+        exit();
+    }
 
-// Campos vacíos
-if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($calle) || empty($colonia) || empty($codigo_postal) || empty($email) || empty($contrasena) || empty($confirm_contrasena)) {
-    header("Location: ../html/registro.html?error=1");
-    exit();
-}
+    if (!preg_match('/^\d{10}$/', $telefono)) {
+        header("Location: ../html/registro_cliente.html?error=telefono_invalido");
+        exit();
+    }
 
-// Teléfono 10 dígitos
-if (!preg_match("/^\d{10}$/", $telefono)) {
-    header("Location: ../html/registro.html?error=2");
-    exit();
-}
+    if ($contrasena !== $confirmar_contrasena) {
+        header("Location: ../html/registro_cliente.html?error=contrasenas_no_coinciden");
+        exit();
+    }
 
-// Contraseñas iguales
-if ($contrasena !== $confirm_contrasena) {
-    header("Location: ../html/registro.html?error=3");
-    exit();
-}
+    // Verificar si el correo ya existe
+    $query_check = "SELECT * FROM cliente WHERE email = ?";
+    $stmt_check = $conn->prepare($query_check);
+    $stmt_check->bind_param("s", $email);
+    $stmt_check->execute();
+    $result = $stmt_check->get_result();
 
-// Validar email único
-$stmt = mysqli_prepare($conexion, "SELECT id_cliente FROM cliente WHERE email = ?");
-mysqli_stmt_bind_param($stmt, "s", $email);
-mysqli_stmt_execute($stmt);
-mysqli_stmt_store_result($stmt);
-if (mysqli_stmt_num_rows($stmt) > 0) {
-    header("Location: ../html/registro.html?error=4");
-    exit();
-}
+    if ($result->num_rows > 0) {
+        header("Location: ../html/registro_cliente.html?error=correo_existente");
+        exit();
+    }
 
-// =================== GUARDAR CLIENTE ===================
+    // Hashear la contraseña antes de guardarla
+    $hash_contrasena = password_hash($contrasena, PASSWORD_DEFAULT);
 
-// Hashear contraseña
-$hash_password = password_hash($contrasena, PASSWORD_DEFAULT);
+    // Insertar el cliente en la base de datos
+    $query = "INSERT INTO cliente (nombre, apellidos, telefono, calle, colonia, codigo_postal, email, contrasena)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ssssssss", $nombre, $apellidos, $telefono, $calle, $colonia, $codigo_postal, $email, $hash_contrasena);
 
-// Insertar en la base de datos
-$stmt = mysqli_prepare($conexion, "INSERT INTO cliente (nombre, apellidos, telefono, calle, colonia, codigo_postal, email, contrasena) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-mysqli_stmt_bind_param($stmt, "ssssssss", $nombre, $apellidos, $telefono, $calle, $colonia, $codigo_postal, $email, $hash_password);
-
-if (mysqli_stmt_execute($stmt)) {
-    header("Location: ../html/client-login.html?success=1");
-    exit();
-} else {
-    header("Location: ../html/registro.html?error=5");
-    exit();
+    if ($stmt->execute()) {
+        header("Location: ../html/login_cliente.html?registro=exitoso");
+        exit();
+    } else {
+        header("Location: ../html/registro_cliente.html?error=bd");
+        exit();
+    }
 }
 ?>

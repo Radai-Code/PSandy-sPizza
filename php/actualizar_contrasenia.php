@@ -1,55 +1,51 @@
 <?php
-require_once 'conexion.php'; // Incluir la conexión
+include 'conexion.php';
 
-// Habilitar errores para depuración
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = trim($_POST["email"]);
+    $nueva_contrasena = $_POST["nueva_contrasena"];
+    $confirmar_contrasena = $_POST["confirmar_contrasena"];
+    $user_type = $_POST["user_type"]; // 'client' o 'admin'
 
-// Verificar que se recibieron todos los datos necesarios
-if (!isset($_POST['email'], $_POST['nueva_contrasena'], $_POST['confirmar_contrasena'], $_POST['user_type'])) {
-    // Si faltan datos, detener y mostrar el mensaje de error
-    die("Error: Datos incompletos."); 
+    // Validar campos vacíos
+    if (empty($email) || empty($nueva_contrasena) || empty($confirmar_contrasena)) {
+        header("Location: ../html/recuperarContrasenia.php?error=campos_vacios&type=$user_type");
+        exit();
+    }
+
+    // Validar coincidencia de contraseñas
+    if ($nueva_contrasena !== $confirmar_contrasena) {
+        header("Location: ../html/recuperarContrasenia.php?error=no_coinciden&type=$user_type");
+        exit();
+    }
+
+    // Hashear la nueva contraseña
+    $hash_contrasena = password_hash($nueva_contrasena, PASSWORD_DEFAULT);
+
+    // Determinar tabla según el tipo de usuario
+    $tabla = ($user_type === 'admin') ? 'empleado' : 'cliente';
+
+    // Preparar la consulta
+    $query = "UPDATE $tabla SET contrasena = ? WHERE email = ?";
+    $stmt = $conexion->prepare($query);
+
+    if (!$stmt) {
+        die("Error al preparar la consulta: " . $conexion->error);
+    }
+
+    $stmt->bind_param("ss", $hash_contrasena, $email);
+    $stmt->execute();
+
+    // Verificar si se actualizó la contraseña
+    if ($stmt->affected_rows > 0) {
+        header("Location: ../html/login.html?restablecido=1&type=$user_type");
+        exit();
+    } else {
+        header("Location: ../html/recuperarContrasenia.php?error=no_encontrado&type=$user_type");
+        exit();
+    }
+
+    $stmt->close();
+    $conexion->close();
 }
-
-// Obtener los datos del formulario
-$email = $_POST['email'];
-$nueva_contrasena = $_POST['nueva_contrasena'];
-$confirmar_contrasena = $_POST['confirmar_contrasena'];
-$user_type = $_POST['user_type'];
-
-// Verificar que las contraseñas coincidan
-if ($nueva_contrasena !== $confirmar_contrasena) {
-    // Si no coinciden, redirigir de vuelta a nueva_contrasenia.php con un error
-    header("Location: nueva_contrasenia.php?email=" . urlencode($email) . "&type=" . $user_type . "&error=no_coincide");
-    exit();
-}
-
-// Determinar la tabla a actualizar
-$table = ($user_type === 'admin') ? 'Empleado' : 'Cliente';
-
-// Preparar la consulta SQL para actualizar la contraseña (texto plano)
-$sql = "UPDATE $table SET contrasena = ? WHERE email = ?";
-$stmt = mysqli_prepare($conexion, $sql);
-
-if (!$stmt) {
-    die("Error al preparar la consulta: " . mysqli_error($conexion));
-}
-
-// Vincular los parámetros
-mysqli_stmt_bind_param($stmt, "ss", $nueva_contrasena, $email);
-
-// Ejecutar la actualización
-if (mysqli_stmt_execute($stmt)) {
-    // Éxito: Redirigir a la página de login correspondiente
-    $redirect_url = ($user_type === 'admin') ? '../html/admin/login-admin.html' : '../html/client-login.html';
-    header("Location: " . $redirect_url . "?reset=exitoso");
-    exit();
-} else {
-    // Falla al actualizar
-    echo "Error al actualizar la contraseña: " . mysqli_error($conexion);
-}
-
-// Cerrar la conexión
-mysqli_stmt_close($stmt);
-mysqli_close($conexion);
 ?>
