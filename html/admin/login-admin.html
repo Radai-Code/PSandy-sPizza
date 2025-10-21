@@ -15,6 +15,40 @@
     <!-- Icono -->
     <link rel="icon" type="image/png" href="http://localhost/PSandy-sPizza/src/imagenes/logo.png">
 </head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get("error");
+        const formPanel = document.querySelector(".admin-form");
+        const passwordInput = document.getElementById("password");
+
+        // Eliminar mensaje anterior si existe
+        const existingMsg = document.querySelector(".error-msg");
+        if (existingMsg) existingMsg.remove();
+
+        if (error === "2" || error === "3") {
+            let msg = document.createElement("p");
+            msg.classList.add("error-msg");
+            msg.style.color = "red";
+            msg.style.fontWeight = "600";
+            msg.style.textAlign = "center";
+            msg.style.marginTop = "10px";
+
+            if (error === "2") {
+                msg.textContent = "⚠️ Contraseña incorrecta";
+            } else if (error === "3") {
+                msg.textContent = "⚠️ El correo no está registrado";
+            }
+
+            // Insertar mensaje justo encima del botón de enviar
+            formPanel.appendChild(msg);
+
+            // Vaciar campo de contraseña
+            if (passwordInput) passwordInput.value = "";
+        }
+    });
+</script>
+
 
 <body>
     <div class="admin-container">

@@ -13,6 +13,35 @@
     <link rel="stylesheet" href="../src/css/client-login.css">
     <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
 </head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get("error");
+        const formPanel = document.querySelector(".form-content");
+        const passwordInput = document.getElementById("password");
+
+        // Eliminar mensajes previos
+        const existingMsg = document.querySelector(".error-msg");
+        if (existingMsg) existingMsg.remove();
+
+        let msg = document.createElement("p");
+        msg.classList.add("error-msg");
+        msg.style.color = "red";
+        msg.style.fontWeight = "600";
+        msg.style.textAlign = "center";
+        msg.style.marginTop = "10px";
+
+        if (error === "2") {
+            msg.textContent = "⚠️ Contraseña incorrecta";
+            if (passwordInput) passwordInput.value = "";
+            formPanel.appendChild(msg);
+        } else if (error === "3") {
+            msg.textContent = "⚠️ El correo no está registrado";
+            if (passwordInput) passwordInput.value = "";
+            formPanel.appendChild(msg);
+        }
+    });
+</script>
 
 <body>
     <div class="login-wrapper">

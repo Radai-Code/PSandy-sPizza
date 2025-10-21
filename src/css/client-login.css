@@ -165,3 +165,17 @@ body {
         /* Ocultamos la imagen en móviles para dar espacio al formulario */
     }
 }
+
+/* ===== Estilo para Mensaje de Error ===== */
+.error-message {
+    background-color: #ffebee;
+    /* Light red background */
+    color: #c62828;
+    /* Dark red text */
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    /* Space below the message */
+    text-align: center;
+}

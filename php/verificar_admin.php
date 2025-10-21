@@ -1,9 +1,7 @@
 <?php
-// Incluir el archivo de conexión.
 require_once 'conexion.php'; 
 session_start();
 
-// Validar que los datos fueron enviados
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     exit('Acceso no permitido');
 }
@@ -11,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 $email_form = $_POST['email']; 
 $contrasena_form = $_POST['password'];
 
-// 1. CORRECCIÓN: La consulta ahora busca en la tabla Empleado por la columna 'email'
+// Buscar usuario admin
 $sql = "SELECT id_empleado, nombre, contrasena FROM empleado WHERE email = ? AND rol = 'admin'";
 $stmt = mysqli_prepare($conexion, $sql);
 
@@ -24,19 +22,20 @@ mysqli_stmt_execute($stmt);
 $resultado = mysqli_stmt_get_result($stmt);
 
 if ($fila = mysqli_fetch_assoc($resultado)) {
-    // 2. CORRECCIÓN: Usar password_verify() para comparar la contraseña de forma segura
+    // ✅ Comparar con hash
     if (password_verify($contrasena_form, $fila['contrasena'])) {
-        
-        // ¡Éxito!
         $_SESSION['admin_id'] = $fila['id_empleado'];
         $_SESSION['admin_usuario'] = $fila['nombre'];
-        
         header("Location: ../html/admin/dashboard.html");
         exit();
+    } else {
+        // Contraseña incorrecta
+        header("Location: ../html/admin/login-admin.html?error=2");
+        exit();
     }
+} else {
+    // Correo no registrado
+    header("Location: ../html/admin/login-admin.html?error=3");
+    exit();
 }
-
-// Si el usuario no existe o la contraseña es incorrecta, redirige con error.
-header("Location: ../html/admin/dashboard.html");
-exit();
 ?>
