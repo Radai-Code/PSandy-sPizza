@@ -173,3 +173,13 @@ body {
     background-color: #e8f5e9;
     color: #2e7d32;
 }
+
+.error-message {
+    background-color: #ffe6e6;
+    color: #c0392b;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+}

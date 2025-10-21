@@ -1,41 +1,32 @@
 <?php
-require_once 'conexion.php'; 
-session_start();
+include 'conexion.php';
 
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-    exit('Acceso no permitido');
-}
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = trim($_POST["email"]);
+    $user_type = $_POST["user_type"]; // 'client' o 'admin'
 
-$email_form = $_POST['email'];
-$contrasena_form = $_POST['password'];
-
-// Buscar cliente
-$sql = "SELECT id_cliente, nombre, contrasena FROM cliente WHERE email = ?";
-$stmt = mysqli_prepare($conexion, $sql);
-
-if (!$stmt) {
-    die("Error al preparar la consulta: " . mysqli_error($conexion));
-}
-
-mysqli_stmt_bind_param($stmt, "s", $email_form);
-mysqli_stmt_execute($stmt);
-$resultado = mysqli_stmt_get_result($stmt);
-
-if ($fila = mysqli_fetch_assoc($resultado)) {
-    // ✅ Comparar con hash
-    if (password_verify($contrasena_form, $fila['contrasena'])) {
-        $_SESSION['user_id'] = $fila['id_cliente'];
-        $_SESSION['user_nombre'] = $fila['nombre'];
-        header("Location: ../html/menu.php");
-        exit();
-    } else {
-        // Contraseña incorrecta
-        header("Location: ../html/client-login.html?error=2");
+    if (empty($email)) {
+        header("Location: ../html/recuperarContrasenia.php?error=correo_vacio&type=$user_type");
         exit();
     }
-} else {
-    // Correo no registrado
-    header("Location: ../html/client-login.html?error=3");
-    exit();
+
+    // Seleccionamos la tabla según el tipo de usuario
+    $tabla = ($user_type === 'admin') ? 'admin' : 'cliente';
+
+    // Verificar si el correo existe
+    $stmt = $conexion->prepare("SELECT * FROM $tabla WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+
+    if ($resultado->num_rows > 0) {
+        // Si existe, redirige a la página para actualizar contraseña
+        header("Location: ../html/actualizarContrasenia.php?email=$email&type=$user_type");
+        exit();
+    } else {
+        // Si no existe, regresa con error
+        header("Location: ../html/recuperarContrasenia.php?error=correo_no_registrado&type=$user_type");
+        exit();
+    }
 }
 ?>

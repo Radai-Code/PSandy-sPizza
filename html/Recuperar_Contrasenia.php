@@ -23,8 +23,26 @@ $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
             <div class="form-content">
                 <h1>Recuperar Contraseña</h1>
                 <p class="subtitle">Ingresa tu correo para continuar</p>
+                <?php if (isset($_GET['error'])): ?>
+    <div class="error-message">
+        <?php
+        switch ($_GET['error']) {
+            case 'correo_no_registrado':
+                echo "❌ El correo no está registrado.";
+                break;
+            case 'correo_vacio':
+                echo "⚠️ Debes ingresar un correo.";
+                break;
+            default:
+                echo "⚠️ Ocurrió un error. Inténtalo nuevamente.";
+                break;
+        }
+        ?>
+    </div>
+<?php endif; ?>
 
-<form class="login-form" action="/PSandy-sPizza/php/verificar_email.php" method="post">
+
+<form class="login-form" action="   /PSandy-sPizza/php/verificar_email.php" method="post">
     <input type="hidden" name="user_type" value="<?php echo $user_type; ?>">
     <div class="input-group">
         <input type="email" name="email" placeholder="Correo Electrónico" required>
