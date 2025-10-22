@@ -1,7 +1,10 @@
 CREDENCIALES PARA INGRESAR COMO ADMIN
 mareli@gmail.com
-mareli19
+123
 
 CREDENCIALES PARA INGRESAR COMO cliente
 kevin@gmail.com
-cliente123
+123
+
+luna@ejemplo
+lunabot
