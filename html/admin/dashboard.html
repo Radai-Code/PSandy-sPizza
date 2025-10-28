@@ -19,9 +19,8 @@
                 <img src="../../src/imagenes/logo.png" alt="Logo">
                 <span>Sandy's Pizzas</span>
             </div>
-
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">Productos</a> <a href="empleados.html"
+                <a href="dashboard.html" class="nav-item active">Productos</a> <a href="empleados.html"
                     class="nav-item">Empleados</a>
                 <a href="#" class="nav-item">Pedidos</a>
                 <a href="#" class="nav-item">Clientes</a>
@@ -38,7 +37,7 @@
             <main class="content-area">
                 <div class="content-header">
                     <h3>Gestión de Productos</h3>
-                    <button class="btn-primary">＋ Agregar Nuevo Producto</button>
+                    <button class="btn-primary" id="btn-agregar-producto">＋ Agregar Nuevo Producto</button>
                 </div>
 
                 <div class="table-container">
@@ -46,43 +45,23 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Imagen</th>
                                 <th>Nombre</th>
-                                <th>Categoría</th>
+                                <th>Descripción</th>
                                 <th>Precio</th>
+                                <th>Tamaño</th>
+                                <th>Clasificación</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><img src="https://via.placeholder.com/60" alt="Pizza" class="product-thumb"></td>
-                                <td>Pizza de Peperoni</td>
-                                <td>Pizzas</td>
-                                <td>$150.00</td>
-                                <td>
-                                    <button class="btn-action btn-edit">Editar</button>
-                                    <button class="btn-action btn-delete">Eliminar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><img src="https://via.placeholder.com/60" alt="Hamburguesa" class="product-thumb">
-                                </td>
-                                <td>Hamburguesa Clásica</td>
-                                <td>Hamburguesas</td>
-                                <td>$120.00</td>
-                                <td>
-                                    <button class="btn-action btn-edit">Editar</button>
-                                    <button class="btn-action btn-delete">Eliminar</button>
-                                </td>
-                            </tr>
+                        <tbody id="productos-tbody">
                         </tbody>
                     </table>
                 </div>
             </main>
         </div>
     </div>
+
+    <script src="../../js/admin/productos.js"></script>
 </body>
 
 </html>
