@@ -162,4 +162,5 @@ switch($action) {
         responderJson($response);
 }
 if ($conexion) { mysqli_close($conexion); }
+
 ?>

@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoDescuentoInput = document.getElementById("producto-descuento");
     const productoStockInput = document.getElementById("producto-stock");
     const productoTamanoSelect = document.getElementById("producto-tamano");
-    const productoClasificacionSelect = document.getElementById("producto-clasificacion"); // Referencia al select
+    const productoClasificacionSelect = document.getElementById("producto-clasificacion");
 
     // --- Funciones para Abrir/Cerrar Modal ---
     function abrirModal() { modal.style.display = "block"; }
@@ -37,11 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
         abrirModal();
     });
 
-    // --- Carga Inicial de Datos ---
+    // --- Carga Inicial ---
     cargarProductos();
-    cargarClasificaciones(); // Cargar clasificaciones en el modal
+    cargarClasificaciones();
 
-    // --- Funciones Asíncronas (Comunicación con PHP) ---
+    // --- Funciones Asíncronas ---
     async function cargarProductos() {
         try {
             const response = await fetch("../../php/admin/productos_crud.php?action=listar");
@@ -116,16 +116,28 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const respuesta = await response.text();
-            alert(respuesta);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Operación exitosa',
+                text: respuesta,
+                timer: 1800,
+                showConfirmButton: false
+            });
+
             cerrarModal();
             cargarProductos();
         } catch (error) {
             console.error(`Error al ${action} producto:`, error);
-            alert(`Error: ${error.message}`);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Error: ${error.message}`,
+            });
         }
     });
 
-    // --- Funciones de Botones de Acción ---
+    // --- Botones de Acción ---
     function asignarListenersBotones() {
         tablaBody.querySelectorAll(".btn-edit").forEach(btn => {
             btn.removeEventListener('click', handleEditClick);
@@ -162,31 +174,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 modalTitle.textContent = "Editar Producto";
                 abrirModal();
             } else {
-                alert("Producto no encontrado.");
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Producto no encontrado',
+                    text: 'No se pudieron cargar los datos del producto seleccionado.',
+                });
             }
         } catch (error) {
             console.error("Error al obtener producto para editar:", error);
-            alert(`Error: ${error.message}`);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar',
+                text: error.message
+            });
         }
     }
 
     async function handleDeleteClick(event) {
         const id = event.target.dataset.id;
-        if (confirm(`¿Estás seguro de eliminar el producto ID ${id}?`)) {
-            const formData = new FormData();
-            formData.append("action", "eliminar");
-            formData.append("id_producto", id);
-            try {
-                const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                const respuesta = await response.text();
-                alert(respuesta);
-                cargarProductos();
-            } catch (error) {
-                console.error("Error al eliminar:", error);
-                alert(`Error: ${error.message}`);
+
+        Swal.fire({
+            title: `¿Eliminar producto ID ${id}?`,
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append("action", "eliminar");
+                formData.append("id_producto", id);
+
+                try {
+                    const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const respuesta = await response.text();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminado',
+                        text: respuesta,
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+
+                    cargarProductos();
+                } catch (error) {
+                    console.error("Error al eliminar:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al eliminar',
+                        text: error.message
+                    });
+                }
             }
-        }
+        });
     }
 
     async function handleViewClick(event) {
@@ -198,33 +243,44 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const p = await response.json();
+
             if (p) {
-                alert(
-                    `ID: ${p.id_producto}\n` +
-                    `Nombre: ${p.nombre || ''}\n` +
-                    `Descripción: ${p.descripcion || ''}\n` +
-                    `Precio Original: $${parseFloat(p.precio_unitario || 0).toFixed(2)}\n` +
-                    `Descuento: ${p.descuento_porcentaje || 0}%\n` +
-                    `Stock: ${p.stock || 0}\n` +
-                    `Tamaño: ${p.tamaño || ''}\n` +
-                    `Clasificación ID: ${p.id_clasificacion || ''}`
-                );
+                Swal.fire({
+                    title: p.nombre || "Producto sin nombre",
+                    html: `
+                        <b>ID:</b> ${p.id_producto}<br>
+                        <b>Descripción:</b> ${p.descripcion || ''}<br>
+                        <b>Precio:</b> $${parseFloat(p.precio_unitario || 0).toFixed(2)}<br>
+                        <b>Descuento:</b> ${p.descuento_porcentaje || 0}%<br>
+                        <b>Stock:</b> ${p.stock || 0}<br>
+                        <b>Tamaño:</b> ${p.tamaño || ''}<br>
+                        <b>Clasificación:</b> ${p.id_clasificacion || ''}
+                    `,
+                    icon: 'info'
+                });
             } else {
-                alert("No se encontraron datos.");
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin datos',
+                    text: 'No se encontraron datos del producto.'
+                });
             }
         } catch (error) {
             console.error("Error al visualizar:", error);
-            alert(`Error: ${error.message}`);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al visualizar',
+                text: error.message
+            });
         }
     }
 
-    // --- Función Helper para Crear el Modal ---
+    // --- Crear Modal ---
     function crearModalProducto() {
         const div = document.createElement("div");
         div.id = "form-producto-modal";
         div.className = "modal";
         div.style.display = "none";
-        // --- CÓDIGO CORREGIDO: Sin 'enctype' y sin 'input' de imagen ---
         div.innerHTML = `
         <div class="modal-content">
             <span class="close-button">&times;</span>
