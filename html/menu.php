@@ -1,9 +1,9 @@
 <?php
-// 1. INCLUIR LA CONEXIÓN A LA BASE DE DATOS Y EMPEZAR LA SESIÓN
-require_once '../php/conexion.php'; // Asegúrate de que la ruta a tu conexión sea correcta
+// 1. INCLUIR LA CONEXIÓN Y EMPEZAR LA SESIÓN
+require_once '../php/conexion.php'; 
 session_start();
 
-// 2. CONSULTAR TODOS LOS PRODUCTOS DE LA BASE DE DATOS
+// 2. CONSULTAR TODOS LOS PRODUCTOS (p.* incluirá la nueva columna 'stock')
 $sql_productos = "SELECT p.*, c.nombre_clasificacion 
                   FROM Producto p
                   LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion
@@ -13,20 +13,14 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
 ?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú - Sandy's Pizzas</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="../src/css/menu.css">
     <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
 </head>
-
 <body>
 
     <header class="menu-header">
@@ -34,26 +28,21 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
         <nav class="main-nav">
             <a href="carrito.html" class="cart-link">🛒 Mi Carrito</a>
             
-            <?php if (isset($_SESSION['user_id'])): // Lógica de sesión del cliente ?>
-                
+            <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="user-profile">
                     <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
                     <img src="../src/imagenes/icons/cliente.png" alt="Perfil">
                 </div>
                 <a href="../php/logout_cliente.php" class="login-link">Cerrar Sesión</a>
-
-            <?php else: ?>
-                
+            <?php else: ?>  
                 <a href="login.html" class="login-link">Iniciar Sesión</a>
-
             <?php endif; ?>
         </nav>
     </header>
 
     <main class="menu-container">
         <h1 class="main-title">Nuestro Menú</h1>
-
-        <div class="category-filters">
+       <div class="category-filters">
             <button class="filter-btn active" data-filter="todos">Todos</button>
             <button class="filter-btn" data-filter="pizzas">Pizzas</button>
             <button class="filter-btn" data-filter="bebidas">Bebidas</button>
@@ -64,55 +53,93 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
         </div>
 
         <div class="product-grid">
-
             <?php
             if ($resultado_productos && mysqli_num_rows($resultado_productos) > 0):
                 while ($producto = mysqli_fetch_assoc($resultado_productos)):
-                    
                     $categoria_filtro = strtolower($producto['nombre_clasificacion'] ?? 'otros');
             ?>
             
             <div class="product-card" data-category="<?php echo htmlspecialchars($categoria_filtro); ?>">
-                <form action="../php/agregar_al_carrito.php" method="post">
+                <div class="product-info">
+                    <h2><?php echo htmlspecialchars($producto['nombre']); ?></h2>
+                    <p><?php echo htmlspecialchars($producto['descripcion']); ?></p>
                     
-                    <div class="product-info">
-                        <h2><?php echo htmlspecialchars($producto['nombre']); ?></h2>
-                        <p><?php echo htmlspecialchars($producto['descripcion']); ?></p>
-                        
-                        <span class="price">
-                        <?php
-                        $precio_original = (float)$producto['precio_unitario'];
-                        $descuento = (int)$producto['descuento_porcentaje'];
+                    <span class="price">
+                    <?php
+                    $precio_original = (float)$producto['precio_unitario'];
+                    $descuento = (int)$producto['descuento_porcentaje'];
+                    $precio_final = $precio_original; // Precio por defecto
 
-                        if ($descuento > 0) {
-                            $precio_nuevo = $precio_original * (1 - ($descuento / 100));
-                            // Mostrar precio original tachado y el nuevo precio
-                            echo '<del class="precio-original">$'.number_format($precio_original, 2).'</del> ';
-                            echo '<strong class="precio-nuevo">$'.number_format($precio_nuevo, 2).'</strong>';
-                        } else {
-                            // Mostrar solo el precio normal
-                            echo '$'.number_format($precio_original, 2);
-                        }
-                        ?>
-                        </span>
-                        </div>
+                    if ($descuento > 0) {
+                        $precio_final = $precio_original * (1 - ($descuento / 100));
+                        echo '<del class="precio-original">$'.number_format($precio_original, 2).'</del> ';
+                        echo '<strong class="precio-nuevo">$'.number_format($precio_final, 2).'</strong>';
+                    } else {
+                        echo '$'.number_format($precio_original, 2);
+                    }
+                    ?>
+                    </span>
+                </div>
 
-                    <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
-                    <button type="submit" class="add-to-cart-btn">Agregar al Carrito</button>
-                </form>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <button type="button" class="add-to-cart-btn btn-pedir-directo"
+                            data-id="<?php echo $producto['id_producto']; ?>"
+                            data-nombre="<?php echo htmlspecialchars($producto['nombre']); ?>"
+                            data-precio="<?php echo $precio_final; ?>"
+                            data-stock="<?php echo $producto['stock']; ?>">
+                        Pedir Ahora
+                    </button>
+                <?php else: ?>
+                    <a href="login.html" class="add-to-cart-btn btn-login-para-pedir">
+                        Inicia sesión para Pedir
+                    </a>
+                <?php endif; ?>
+
             </div>
 
             <?php
                 endwhile; 
             else:
-                echo "<p>No hay productos disponibles en este momento.</p>";
+                echo "<p>No hay productos disponibles.</p>";
             endif;
-            
             mysqli_close($conexion);
             ?>
-            </div>
+        </div>
     </main>
 
+    <div id="modal-pedido-directo" class="modal-pedido">
+        <div class="modal-pedido-content">
+            <span class="close-pedido-modal">&times;</span>
+            <h2 id="modal-producto-nombre">Nombre del Producto</h2>
+            
+            <form id="form-pedido-directo">
+                <input type="hidden" id="modal-producto-id" name="id_producto">
+
+                <div class="info-row">
+                    <strong>Precio Final:</strong>
+                    <span id="modal-producto-precio">$0.00</span>
+                </div>
+                <div class="info-row">
+                    <strong>Disponibles:</strong>
+                    <span id="modal-producto-stock">0</span>
+                </div>
+
+                <hr>
+
+                <div class="form-group-pedido">
+                    <label for="modal-promo-codigo">Código de Promoción:</label>
+                    <input type="text" id="modal-promo-codigo" name="promo_codigo" placeholder="Ej: BIENVENIDO10">
+                </div>
+
+                <div class="form-group-pedido">
+                    <label for="modal-cantidad">Cantidad:</label>
+                    <input type="number" id="modal-cantidad" name="cantidad" value="1" min="1">
+                </div>
+                
+                <button type="submit" class="btn-confirmar-pedido">Confirmar Pedido</button>
+            </form>
+        </div>
+    </div>
     <script src="../js/menu.js"></script>
 </body>
 </html>

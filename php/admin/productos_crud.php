@@ -8,7 +8,7 @@ if (!isset($_SESSION['admin_id'])) {
     responderJson(['status' => 'error', 'message' => 'Acceso denegado. Inicia sesión.']);
 }
 
-// --- Funciones Helper (sin cambios) ---
+// --- Funciones Helper ---
 function responderJson($data) {
     global $conexion;
     header('Content-Type: application/json');
@@ -28,19 +28,36 @@ function responderTexto($mensaje) {
 }
 // --- Fin Funciones Helper ---
 
-// Se eliminó la función manejarSubidaImagen()
+// (Función manejarSubidaImagen ELIMINADA)
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $response = ['status' => 'error', 'message' => 'Acción no válida.'];
 
 switch($action) {
     case 'listar':
-        $query = mysqli_query($conexion, "SELECT * FROM Producto ORDER BY id_producto");
+        // CORREGIDO: Hacer JOIN para obtener el nombre de la clasificación
+        $sql = "SELECT p.*, c.nombre_clasificacion 
+                FROM Producto p 
+                LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion 
+                ORDER BY p.id_producto";
+        $query = mysqli_query($conexion, $sql);
         if ($query) {
             $productos = mysqli_fetch_all($query, MYSQLI_ASSOC);
             responderJson($productos);
         } else {
             $response['message'] = 'Error al listar productos.';
+            responderJson($response);
+        }
+        break;
+
+    case 'listar_clasificaciones':
+        // Esta acción es necesaria para el dropdown del modal
+        $query = mysqli_query($conexion, "SELECT id_clasificacion, nombre_clasificacion FROM Clasificacion ORDER BY nombre_clasificacion");
+        if ($query) {
+            $clasificaciones = mysqli_fetch_all($query, MYSQLI_ASSOC);
+            responderJson($clasificaciones);
+        } else {
+            $response['message'] = 'Error al listar clasificaciones.';
             responderJson($response);
         }
         break;
@@ -72,14 +89,16 @@ switch($action) {
         $precio = filter_input(INPUT_POST, 'precio_unitario', FILTER_VALIDATE_FLOAT);
         $tamano = trim($_POST['tamaño'] ?? '');
         $descuento = filter_input(INPUT_POST, 'descuento_porcentaje', FILTER_VALIDATE_INT) ?? 0;
+        $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT) ?? 0;
+        $clasificacion = filter_input(INPUT_POST, 'id_clasificacion', FILTER_VALIDATE_INT);
         
-        // No se maneja imagen
+        if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
 
         if (!empty($nombre) && $precio !== false && !empty($tamano)) {
-            // Se quita 'imagen_url' del INSERT
-            $stmt = mysqli_prepare($conexion, "INSERT INTO Producto (nombre, descripcion, precio_unitario, tamaño, descuento_porcentaje) VALUES (?, ?, ?, ?, ?)");
-            // Se quita 's' (para imagen) y $imagen_nombre_db del bind
-            mysqli_stmt_bind_param($stmt, "ssdsi", $nombre, $descripcion, $precio, $tamano, $descuento);
+            // CORREGIDO: Sin imagen_url
+            $stmt = mysqli_prepare($conexion, "INSERT INTO Producto (nombre, descripcion, precio_unitario, tamaño, descuento_porcentaje, stock, id_clasificacion) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            // CORREGIDO: Sin 's' de imagen, 'i' de stock, 'i' de clasificacion
+            mysqli_stmt_bind_param($stmt, "ssdsiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion);
 
             if (mysqli_stmt_execute($stmt)) {
                  responderTexto("✅ Producto agregado");
@@ -88,7 +107,7 @@ switch($action) {
             }
             mysqli_stmt_close($stmt);
         } else {
-             responderTexto("❌ Error: Faltan datos o formato incorrecto (Nombre, Precio, Tamaño).");
+             responderTexto("❌ Error: Faltan datos o formato incorrecto.");
         }
         break;
 
@@ -99,14 +118,16 @@ switch($action) {
         $precio = filter_input(INPUT_POST, 'precio_unitario', FILTER_VALIDATE_FLOAT);
         $tamano = trim($_POST['tamaño'] ?? '');
         $descuento = filter_input(INPUT_POST, 'descuento_porcentaje', FILTER_VALIDATE_INT) ?? 0;
+        $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT) ?? 0;
+        $clasificacion = filter_input(INPUT_POST, 'id_clasificacion', FILTER_VALIDATE_INT);
         
-        // No se maneja imagen
-
+        if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
+        
         if ($id && !empty($nombre) && $precio !== false && !empty($tamano)) {
-             // Se quita 'imagen_url=?' del UPDATE
-             $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=? WHERE id_producto=?");
-             // Se quita 's' (para imagen) y $imagen_nombre_db del bind
-             mysqli_stmt_bind_param($stmt, "ssdsii", $nombre, $descripcion, $precio, $tamano, $descuento, $id);
+             // CORREGIDO: Sin imagen_url
+             $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=?, stock=?, id_clasificacion=? WHERE id_producto=?");
+             // CORREGIDO: Sin 's' de imagen
+             mysqli_stmt_bind_param($stmt, "ssdsiiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $id);
 
              if (mysqli_stmt_execute($stmt)) {
                   responderTexto("✏️ Producto actualizado");
@@ -122,9 +143,7 @@ switch($action) {
     case 'eliminar':
         $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
         if ($id) {
-            // No se borra imagen del servidor
-            
-            // Eliminar de la base de datos
+            // CORREGIDO: No se borra imagen
             $stmt = mysqli_prepare($conexion, "DELETE FROM Producto WHERE id_producto=?");
             mysqli_stmt_bind_param($stmt, "i", $id);
             if (mysqli_stmt_execute($stmt)) {

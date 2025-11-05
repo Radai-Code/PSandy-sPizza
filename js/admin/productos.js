@@ -19,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoDescripcionInput = document.getElementById("producto-descripcion");
     const productoPrecioInput = document.getElementById("producto-precio");
     const productoDescuentoInput = document.getElementById("producto-descuento");
+    const productoStockInput = document.getElementById("producto-stock");
     const productoTamanoSelect = document.getElementById("producto-tamano");
+    const productoClasificacionSelect = document.getElementById("producto-clasificacion"); // Referencia al select
 
     // --- Funciones para Abrir/Cerrar Modal ---
     function abrirModal() { modal.style.display = "block"; }
@@ -37,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Carga Inicial de Datos ---
     cargarProductos();
+    cargarClasificaciones(); // Cargar clasificaciones en el modal
 
     // --- Funciones Asíncronas (Comunicación con PHP) ---
     async function cargarProductos() {
@@ -48,13 +51,25 @@ document.addEventListener("DOMContentLoaded", () => {
             tablaBody.innerHTML = "";
             productos.forEach(p => {
                 const tr = document.createElement("tr");
+                const precioOrig = parseFloat(p.precio_unitario || 0);
+                const descuento = parseInt(p.descuento_porcentaje || 0);
+                let precioHtml = '';
+                if (descuento > 0) {
+                    const precioNuevo = precioOrig * (1 - (descuento / 100));
+                    precioHtml = `<span class="precio-original">$${precioOrig.toFixed(2)}</span> <span class="precio-descuento">$${precioNuevo.toFixed(2)}</span>`;
+                } else {
+                    precioHtml = `<span>$${precioOrig.toFixed(2)}</span>`;
+                }
+
                 tr.innerHTML = `
                     <td>${p.id_producto}</td>
                     <td>${p.nombre || 'N/A'}</td>
                     <td>${p.descripcion || 'N/A'}</td>
-                    <td>$${parseFloat(p.precio_unitario || 0).toFixed(2)}</td>
+                    <td>${precioHtml}</td>
                     <td>${p.descuento_porcentaje || 0}%</td>
                     <td>${p.tamaño || 'N/A'}</td>
+                    <td>${p.nombre_clasificacion || 'N/A'}</td>
+                    <td>${p.stock || 0}</td>
                     <td>
                         <button class="btn-action btn-edit" data-id="${p.id_producto}">Editar</button>
                         <button class="btn-action btn-view" data-id="${p.id_producto}">Visualizar</button>
@@ -66,7 +81,26 @@ document.addEventListener("DOMContentLoaded", () => {
             asignarListenersBotones();
         } catch (error) {
             console.error("Error cargando productos:", error);
-            tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar: ${error.message}</td></tr>`;
+            tablaBody.innerHTML = `<tr><td colspan="9">Error al cargar: ${error.message}</td></tr>`;
+        }
+    }
+
+    async function cargarClasificaciones() {
+        try {
+            const response = await fetch("../../php/admin/productos_crud.php?action=listar_clasificaciones");
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const clasificaciones = await response.json();
+
+            productoClasificacionSelect.innerHTML = '<option value="">Selecciona...</option>';
+            clasificaciones.forEach(c => {
+                const option = document.createElement("option");
+                option.value = c.id_clasificacion;
+                option.textContent = c.nombre_clasificacion;
+                productoClasificacionSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error cargando clasificaciones:", error);
+            productoClasificacionSelect.innerHTML = '<option value="">Error al cargar</option>';
         }
     }
 
@@ -74,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const id = productoIdInput.value;
         const action = id ? "actualizar" : "crear";
-
         const formData = new FormData(productoForm);
         formData.append("action", action);
         formData.append("id_producto", id);
@@ -123,7 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 productoDescripcionInput.value = p.descripcion || "";
                 productoPrecioInput.value = p.precio_unitario || "";
                 productoDescuentoInput.value = p.descuento_porcentaje || 0;
+                productoStockInput.value = p.stock || 0;
                 productoTamanoSelect.value = p.tamaño || "";
+                productoClasificacionSelect.value = p.id_clasificacion || "";
                 modalTitle.textContent = "Editar Producto";
                 abrirModal();
             } else {
@@ -168,9 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     `ID: ${p.id_producto}\n` +
                     `Nombre: ${p.nombre || ''}\n` +
                     `Descripción: ${p.descripcion || ''}\n` +
-                    `Precio: $${parseFloat(p.precio_unitario || 0).toFixed(2)}\n` +
+                    `Precio Original: $${parseFloat(p.precio_unitario || 0).toFixed(2)}\n` +
                     `Descuento: ${p.descuento_porcentaje || 0}%\n` +
-                    `Tamaño: ${p.tamaño || ''}`
+                    `Stock: ${p.stock || 0}\n` +
+                    `Tamaño: ${p.tamaño || ''}\n` +
+                    `Clasificación ID: ${p.id_clasificacion || ''}`
                 );
             } else {
                 alert("No se encontraron datos.");
@@ -187,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
         div.id = "form-producto-modal";
         div.className = "modal";
         div.style.display = "none";
-        // Se quitó 'enctype' del form y el 'input' de imagen
+        // --- CÓDIGO CORREGIDO: Sin 'enctype' y sin 'input' de imagen ---
         div.innerHTML = `
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -211,6 +248,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <input type="number" id="producto-descuento" name="descuento_porcentaje" min="0" max="100" value="0">
                 </div>
                 <div class="form-group">
+                    <label for="producto-stock">Stock (Disponibles):</label>
+                    <input type="number" id="producto-stock" name="stock" min="0" value="0">
+                </div>
+                <div class="form-group">
                     <label for="producto-tamano">Tamaño:</label>
                     <select id="producto-tamano" name="tamaño" required>
                         <option value="">Selecciona...</option>
@@ -219,6 +260,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         <option value="grande">Grande</option>
                         <option value="gigante">Gigante</option>
                         <option value="familiar">Familiar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="producto-clasificacion">Clasificación:</label>
+                    <select id="producto-clasificacion" name="id_clasificacion" required>
+                        <option value="">Cargando...</option>
                     </select>
                 </div>
                 <div class="form-actions">
