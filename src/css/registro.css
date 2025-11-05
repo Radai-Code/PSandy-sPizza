@@ -5,139 +5,147 @@
     padding: 0;
 }
 
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     overflow: hidden;
-    /* Evita el scroll */
+    /* 🔒 evita que toda la página haga scroll */
+    background-color: #fff;
 }
 
-/* ======== CONTENEDOR PRINCIPAL (PANTALLA DIVIDIDA) ======== */
+/* ======== CONTENEDOR PRINCIPAL ======== */
 .login-wrapper {
     display: flex;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
+    /* 🔒 ocupa exactamente la altura del viewport */
+    align-items: stretch;
 }
 
 /* ======== PANEL IZQUIERDO (IMAGEN) ======== */
 .image-panel {
-    flex: 1.2;
-    background: linear-gradient(rgba(0, 109, 59, 0.6), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=1928') no-repeat center center/cover;
+    flex: 0 0 50%;
+    background: linear-gradient(rgba(0, 109, 59, 0.48), rgba(0, 0, 0, 0.45)),
+        url('https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=1928') no-repeat center center / cover;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #fff;
     text-align: center;
-}
-
-.image-overlay h2 {
-    font-size: 3rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
     padding: 2rem;
 }
 
 /* ======== PANEL DERECHO (FORMULARIO) ======== */
 .form-panel {
-    flex: 1;
+    flex: 0 0 50%;
+    background-color: #fff;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    /* el contenido inicia arriba */
     padding: 2rem;
-    background-color: #fff;
     overflow-y: auto;
-    /* Permite scroll si el formulario es muy largo */
+    /* ✅ solo el formulario puede desplazarse */
+    height: 100vh;
+    /* ocupa toda la pantalla */
 }
 
 .form-content {
     width: 100%;
-    max-width: 400px;
+    max-width: 360px;
     text-align: center;
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 0.9s ease-in-out;
+    margin: auto 0;
+    /* centra verticalmente si el contenido es más pequeño */
+    padding-bottom: 2rem;
+    /* margen inferior para scroll cómodo */
 }
 
+/* ======== LOGO ======== */
+.form-logo {
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
+.form-logo img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ======== TÍTULOS ======== */
 .form-content h1 {
-    font-size: 2.2rem;
+    font-size: 1.9rem;
     color: #333;
     font-weight: 700;
+    margin-bottom: 0.25rem;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #666;
-    margin-bottom: 2rem;
+    margin-bottom: 1.6rem;
 }
 
-/* ======== GRUPOS DE INPUTS MODERNOS ======== */
+/* ======== INPUTS ======== */
 .input-group {
-    margin-bottom: 1rem;
-    /* Un poco menos de espacio para que quepan más campos */
+    margin-bottom: 0.9rem;
 }
 
 .input-group input {
     width: 100%;
-    padding: 0.9rem 1rem;
-    border: 2px solid #e0e0e0;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    padding: 0.85rem 0.95rem;
+    border: 2px solid #e6e6e6;
+    background-color: #fafafa;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
 }
 
 .input-group input:focus {
     outline: none;
     border-color: #ffcc00;
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.14);
 }
 
 .input-group input::placeholder {
     color: #999;
 }
 
-/* ======== BOTÓN Y ENLACES DE AYUDA ======== */
+/* ======== BOTÓN ======== */
 .submit-btn {
     width: 100%;
-    padding: 1rem;
+    padding: 0.95rem;
     background-color: #006d3b;
-    /* Botón de registro en verde */
     color: #fff;
     border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
+    border-radius: 10px;
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 109, 59, 0.3);
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0.9rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 109, 59, 0.25);
 }
 
 .submit-btn:hover {
     background-color: #005a2e;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 109, 59, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 109, 59, 0.34);
 }
 
-.helper-links p {
-    color: #666;
-    margin: 0.5rem 0;
-}
-
-.helper-links a {
-    color: #006d3b;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.helper-links a:hover {
-    text-decoration: underline;
-}
-
-/* ======== ANIMACIÓN DE ENTRADA ======== */
+/* ======== ANIMACIÓN ======== */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(12px);
     }
 
     to {
@@ -146,18 +154,40 @@ body {
     }
 }
 
-/* ======== RESPONSIVO (para móviles) ======== */
+/* ======== RESPONSIVO ======== */
 @media (max-width: 768px) {
     .login-wrapper {
         flex-direction: column;
+        height: auto;
     }
 
     .image-panel {
-        display: none;
+        flex: none;
+        width: 100%;
+        height: 240px;
+        background-position: top center;
     }
 
     .form-panel {
-        /* Permite que ocupe toda la altura en móviles */
-        height: 100vh;
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+        padding: 1.6rem;
+    }
+
+    .form-content {
+        max-width: 100%;
+        padding: 0 8px;
+        margin: 0 auto;
+    }
+
+    .form-logo img {
+        width: 64px;
+        height: 64px;
+    }
+
+    .form-content h1 {
+        font-size: 1.6rem;
     }
 }
