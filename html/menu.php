@@ -1,6 +1,15 @@
 <?php
-// 1. Iniciar la sesión. ESTO DEBE SER LO PRIMERO EN EL ARCHIVO.
+// 1. INCLUIR LA CONEXIÓN A LA BASE DE DATOS Y EMPEZAR LA SESIÓN
+require_once '../php/conexion.php'; // Asegúrate de que la ruta a tu conexión sea correcta
 session_start();
+
+// 2. CONSULTAR TODOS LOS PRODUCTOS DE LA BASE DE DATOS
+$sql_productos = "SELECT p.*, c.nombre_clasificacion 
+                  FROM Producto p
+                  LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion
+                  ORDER BY p.nombre";
+
+$resultado_productos = mysqli_query($conexion, $sql_productos);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -25,7 +34,7 @@ session_start();
         <nav class="main-nav">
             <a href="carrito.html" class="cart-link">🛒 Mi Carrito</a>
             
-            <?php if (isset($_SESSION['user_id'])): ?>
+            <?php if (isset($_SESSION['user_id'])): // Lógica de sesión del cliente ?>
                 
                 <div class="user-profile">
                     <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
@@ -35,10 +44,10 @@ session_start();
 
             <?php else: ?>
                 
-                <a href="login.html" class="login-link">cerrar Sesión</a>
+                <a href="login.html" class="login-link">Iniciar Sesión</a>
 
             <?php endif; ?>
-            </nav>
+        </nav>
     </header>
 
     <main class="menu-container">
@@ -51,39 +60,56 @@ session_start();
             <button class="filter-btn" data-filter="combos">Combos</button>
             <button class="filter-btn" data-filter="hamburguesas">Hamburguesas</button>
             <button class="filter-btn" data-filter="espaguetis">Espaguetis</button>
+            <button class="filter-btn" data-filter="refrescos">Refrescos</button>
         </div>
 
         <div class="product-grid">
 
-            <div class="product-card" data-category="pizzas">
-                <img src="" alt="Pizza de Peperoni" class="product-image">
-                <div class="product-info">
-                    <h2>Pizza de Peperoni</h2>
-                    <p>La clásica que nunca falla, con extra queso y peperoni de primera.</p>
-                    <span class="price">$150.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
-            </div>
+            <?php
+            if ($resultado_productos && mysqli_num_rows($resultado_productos) > 0):
+                while ($producto = mysqli_fetch_assoc($resultado_productos)):
+                    
+                    $categoria_filtro = strtolower($producto['nombre_clasificacion'] ?? 'otros');
+            ?>
             
-            <div class="product-card" data-category="pizzas">
-                <img src="" alt="Pizza Hawaiana" class="product-image">
-                <div class="product-info">
-                    <h2>Pizza Hawaiana</h2>
-                    <p>La controversial pero deliciosa combinación de jamón y piña.</p>
-                    <span class="price">$160.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            <div class="product-card" data-category="<?php echo htmlspecialchars($categoria_filtro); ?>">
+                <form action="../php/agregar_al_carrito.php" method="post">
+                    
+                    <div class="product-info">
+                        <h2><?php echo htmlspecialchars($producto['nombre']); ?></h2>
+                        <p><?php echo htmlspecialchars($producto['descripcion']); ?></p>
+                        
+                        <span class="price">
+                        <?php
+                        $precio_original = (float)$producto['precio_unitario'];
+                        $descuento = (int)$producto['descuento_porcentaje'];
+
+                        if ($descuento > 0) {
+                            $precio_nuevo = $precio_original * (1 - ($descuento / 100));
+                            // Mostrar precio original tachado y el nuevo precio
+                            echo '<del class="precio-original">$'.number_format($precio_original, 2).'</del> ';
+                            echo '<strong class="precio-nuevo">$'.number_format($precio_nuevo, 2).'</strong>';
+                        } else {
+                            // Mostrar solo el precio normal
+                            echo '$'.number_format($precio_original, 2);
+                        }
+                        ?>
+                        </span>
+                        </div>
+
+                    <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
+                    <button type="submit" class="add-to-cart-btn">Agregar al Carrito</button>
+                </form>
             </div>
 
-            <div class="product-card" data-category="bebidas">
-                <img src="" alt="Refresco de Cola" class="product-image">
-                <div class="product-info">
-                    <h2>Refresco de Cola</h2>
-                    <p>Refresco de 600ml bien frío para acompañar tu comida.</p>
-                    <span class="price">$30.00</span>
-                </div>
-                <button class="add-to-cart-btn">Agregar al Carrito</button>
-            </div>
+            <?php
+                endwhile; 
+            else:
+                echo "<p>No hay productos disponibles en este momento.</p>";
+            endif;
+            
+            mysqli_close($conexion);
+            ?>
             </div>
     </main>
 

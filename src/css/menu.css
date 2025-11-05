@@ -205,3 +205,23 @@ body {
     border-radius: 50%;
     border: 2px solid #ffcc00;
 }
+
+/* ===== ESTILOS DE PRECIO MINIMALISTA ===== */
+
+/* Estilo para el precio original (tachado) */
+.price del.precio-original {
+    font-size: 1.1rem;
+    /* Un poco más pequeño que el precio final */
+    font-weight: 400;
+    /* Menos grueso */
+    color: #888;
+    /* Un color gris para que no llame tanto la atención */
+    margin-right: 0.5rem;
+    /* Espacio entre el precio viejo y el nuevo */
+}
+
+/* Estilo para el nuevo precio (con descuento) */
+.price strong.precio-nuevo {
+    /* El color y tamaño lo hereda de la clase .price (verde y grande) */
+    /* Esto hace que el precio con descuento resalte */
+}

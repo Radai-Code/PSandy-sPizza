@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoNombreInput = document.getElementById("producto-nombre");
     const productoDescripcionInput = document.getElementById("producto-descripcion");
     const productoPrecioInput = document.getElementById("producto-precio");
+    const productoDescuentoInput = document.getElementById("producto-descuento");
     const productoTamanoSelect = document.getElementById("producto-tamano");
-    // No classification select needed
 
     // --- Funciones para Abrir/Cerrar Modal ---
     function abrirModal() { modal.style.display = "block"; }
@@ -37,10 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Carga Inicial de Datos ---
     cargarProductos();
-    // No need to load classifications
 
-    // --- Funciones Asíncronas ---
-
+    // --- Funciones Asíncronas (Comunicación con PHP) ---
     async function cargarProductos() {
         try {
             const response = await fetch("../../php/admin/productos_crud.php?action=listar");
@@ -50,12 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
             tablaBody.innerHTML = "";
             productos.forEach(p => {
                 const tr = document.createElement("tr");
-                // Removed classification cell
                 tr.innerHTML = `
                     <td>${p.id_producto}</td>
                     <td>${p.nombre || 'N/A'}</td>
                     <td>${p.descripcion || 'N/A'}</td>
                     <td>$${parseFloat(p.precio_unitario || 0).toFixed(2)}</td>
+                    <td>${p.descuento_porcentaje || 0}%</td>
                     <td>${p.tamaño || 'N/A'}</td>
                     <td>
                         <button class="btn-action btn-edit" data-id="${p.id_producto}">Editar</button>
@@ -68,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             asignarListenersBotones();
         } catch (error) {
             console.error("Error cargando productos:", error);
-            tablaBody.innerHTML = `<tr><td colspan="6">Error al cargar: ${error.message}</td></tr>`; // Colspan reduced
+            tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar: ${error.message}</td></tr>`;
         }
     }
 
@@ -76,10 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const id = productoIdInput.value;
         const action = id ? "actualizar" : "crear";
+
         const formData = new FormData(productoForm);
         formData.append("action", action);
         formData.append("id_producto", id);
-        // Classification is not appended
 
         try {
             const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
@@ -94,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- Funciones de Botones de Acción ---
     function asignarListenersBotones() {
         tablaBody.querySelectorAll(".btn-edit").forEach(btn => {
             btn.removeEventListener('click', handleEditClick);
@@ -123,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 productoNombreInput.value = p.nombre || "";
                 productoDescripcionInput.value = p.descripcion || "";
                 productoPrecioInput.value = p.precio_unitario || "";
+                productoDescuentoInput.value = p.descuento_porcentaje || 0;
                 productoTamanoSelect.value = p.tamaño || "";
-                // No classification field to set
                 modalTitle.textContent = "Editar Producto";
                 abrirModal();
             } else {
@@ -165,12 +164,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const p = await response.json();
             if (p) {
-                // Removed classification from alert
                 alert(
                     `ID: ${p.id_producto}\n` +
                     `Nombre: ${p.nombre || ''}\n` +
                     `Descripción: ${p.descripcion || ''}\n` +
                     `Precio: $${parseFloat(p.precio_unitario || 0).toFixed(2)}\n` +
+                    `Descuento: ${p.descuento_porcentaje || 0}%\n` +
                     `Tamaño: ${p.tamaño || ''}`
                 );
             } else {
@@ -188,12 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
         div.id = "form-producto-modal";
         div.className = "modal";
         div.style.display = "none";
-        // Removed classification form group
+        // Se quitó 'enctype' del form y el 'input' de imagen
         div.innerHTML = `
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h3 id="modal-title">Agregar Producto</h3>
-            <form id="producto-form">
+            <form id="producto-form"> 
                 <input type="hidden" id="producto-id" name="id_producto_hidden">
                 <div class="form-group">
                     <label for="producto-nombre">Nombre:</label>
@@ -206,6 +205,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="form-group">
                     <label for="producto-precio">Precio Unitario:</label>
                     <input type="number" step="0.01" id="producto-precio" name="precio_unitario" required>
+                </div>
+                <div class="form-group">
+                    <label for="producto-descuento">Descuento (%):</label>
+                    <input type="number" id="producto-descuento" name="descuento_porcentaje" min="0" max="100" value="0">
                 </div>
                 <div class="form-group">
                     <label for="producto-tamano">Tamaño:</label>
