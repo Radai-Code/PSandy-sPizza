@@ -3,7 +3,7 @@
 require_once '../php/conexion.php'; 
 session_start();
 
-// 2. CONSULTAR TODOS LOS PRODUCTOS (p.* incluirá la nueva columna 'stock')
+// 2. CONSULTAR TODOS LOS PRODUCTOS
 $sql_productos = "SELECT p.*, c.nombre_clasificacion 
                   FROM Producto p
                   LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion
@@ -20,6 +20,7 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../src/css/menu.css">
     <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -42,7 +43,7 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
 
     <main class="menu-container">
         <h1 class="main-title">Nuestro Menú</h1>
-       <div class="category-filters">
+        <div class="category-filters">
             <button class="filter-btn active" data-filter="todos">Todos</button>
             <button class="filter-btn" data-filter="pizzas">Pizzas</button>
             <button class="filter-btn" data-filter="bebidas">Bebidas</button>
@@ -68,7 +69,7 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
                     <?php
                     $precio_original = (float)$producto['precio_unitario'];
                     $descuento = (int)$producto['descuento_porcentaje'];
-                    $precio_final = $precio_original; // Precio por defecto
+                    $precio_final = $precio_original;
 
                     if ($descuento > 0) {
                         $precio_final = $precio_original * (1 - ($descuento / 100));
@@ -107,6 +108,7 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
         </div>
     </main>
 
+    <!-- MODAL -->
     <div id="modal-pedido-directo" class="modal-pedido">
         <div class="modal-pedido-content">
             <span class="close-pedido-modal">&times;</span>
@@ -140,6 +142,44 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
             </form>
         </div>
     </div>
+
     <script src="../js/menu.js"></script>
+
+    <!-- Confirmación de pedido con diseño minimalista -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const formPedido = document.getElementById("form-pedido-directo");
+        if (formPedido) {
+            formPedido.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: "¿Confirmar pedido?",
+                    text: "Una vez confirmado no podrás modificarlo.",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, confirmar",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true,
+                    background: "#fff",
+                    color: "#333",
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Pedido confirmado",
+                            text: "Tu pedido ha sido registrado correctamente.",
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+                        // Aquí puedes hacer el envío real con fetch o AJAX si quieres registrar el pedido en la BD
+                    }
+                });
+            });
+        }
+    });
+    </script>
 </body>
 </html>

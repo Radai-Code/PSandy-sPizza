@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formPedidoDirecto.addEventListener("submit", (e) => {
             e.preventDefault();
-            alert("Función de pedido directo aún no implementada.");
+            // alert("Función de pedido directo aún no implementada.");
             modalPedido.style.display = "none";
         });
     }
