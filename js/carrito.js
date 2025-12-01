@@ -1,216 +1,181 @@
 // js/carrito.js
-// Asegúrate que este archivo esté en /js/ y que carrito.php lo cargue con ../js/carrito.js
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    // Elementos del DOM
     const listaCarrito = document.getElementById("lista-carrito");
     const subtotalElem = document.getElementById("subtotal");
     const envioElem = document.getElementById("envio");
     const totalElem = document.getElementById("total");
 
+    // Referencia al botón que ahora controlamos con JS
+    const btnConfirmar = document.getElementById("btn-confirmar");
+
+    // Cargar carrito al inicio
     cargarCarrito();
 
     /* ---------------------------------------------------------
-       1. CARGAR PRODUCTOS DEL CARRITO
+       1. LÓGICA CONFIRMAR PEDIDO
+    -----------------------------------------------------------*/
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener("click", () => {
+
+            // Validar que el carrito no esté vacío (Total > envío)
+            const totalTexto = totalElem.textContent.replace('$', '').replace(',', '').trim();
+            const totalValor = parseFloat(totalTexto);
+
+            if (totalValor <= 40) {
+                Swal.fire("Carrito vacío", "Agrega productos antes de confirmar.", "warning");
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Confirmar pedido?',
+                text: "Se procesará tu compra.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#006d3b',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, comprar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    procesarCompra(); // Llama a la función que hace el fetch
+                }
+            });
+        });
+    }
+
+    function procesarCompra() {
+        // Ruta relativa desde php/carrito.php hacia php/pedidos/procesar_pedido.php
+        fetch("pedidos/procesar_pedido.php", {
+            method: "POST"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Pedido Exitoso!',
+                        text: 'Tu pedido #' + data.id_pedido + ' ha sido registrado.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Redirigir al menú
+                        window.location.href = "../html/menu.php";
+                    });
+                } else {
+                    Swal.fire("Error", data.message || "No se pudo procesar", "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Error de conexión con el servidor", "error");
+            });
+    }
+
+    /* ---------------------------------------------------------
+       3. FUNCIONES CRUD DEL CARRITO (Mantenidas para la lógica)
     -----------------------------------------------------------*/
     function cargarCarrito() {
-        // Desde carrito.php (ubicado en /php/) la ruta relativa al CRUD es "carrito_crud.php"
         fetch("carrito_crud.php?action=get")
             .then(res => res.json())
             .then(data => {
-                if (!data || !data.success) {
-                    // Para debug: mostrar en consola
-                    console.warn("carrito_crud respuesta inválida:", data);
-                    listaCarrito.innerHTML = "<p>Tu carrito está vacío.</p>";
-                    subtotalElem.textContent = "$0.00";
-                    totalElem.textContent = "$40.00";
+                if (!data.success || !data.carrito || data.carrito.length === 0) {
+                    listaCarrito.innerHTML = "<p class='text-center'>Tu carrito está vacío 😔</p>";
+                    actualizarTotales(0);
                     return;
                 }
-
-                const carrito = data.carrito || [];
-                if (carrito.length === 0) {
-                    listaCarrito.innerHTML = "<p>Tu carrito está vacío.</p>";
-                    subtotalElem.textContent = "$0.00";
-                    totalElem.textContent = "$40.00";
-                    return;
-                }
-
-                listaCarrito.innerHTML = "";
-                let subtotal = 0;
-
-                carrito.forEach(p => {
-                    let totalProducto = parseFloat(p.precio) * parseInt(p.cantidad);
-                    subtotal += totalProducto;
-
-                    listaCarrito.innerHTML += `
-                        <div class="cart-item" data-id="${p.id}">
-                            <img src="${p.imagen || 'https://via.placeholder.com/100'}" class="item-image" alt="${escapeHtml(p.nombre)}">
-
-                            <div class="item-details">
-                                <h2>${escapeHtml(p.nombre)}</h2>
-                                <p class="item-price">$${Number(p.precio).toFixed(2)}</p>
-                                <button class="btn btn-sm btn-outline-danger remove-btn btn-eliminar">Eliminar</button>
-                            </div>
-
-                            <div class="quantity-selector">
-                                <button class="btn btn-sm btn-secondary quantity-btn btn-restar">-</button>
-                                <span class="quantity">${p.cantidad}</span>
-                                <button class="btn btn-sm btn-secondary quantity-btn btn-sumar">+</button>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                subtotalElem.textContent = "$" + subtotal.toFixed(2);
-
-                let envio = parseFloat(envioElem.textContent.replace(/[^0-9.-]+/g, "")) || 40;
-                let total = subtotal + envio;
-
-                totalElem.textContent = "$" + total.toFixed(2);
-
-                activarBotones();
+                renderizarProductos(data.carrito);
             })
-            .catch(err => {
-                console.error("Error cargando carrito:", err);
-                listaCarrito.innerHTML = "<p>Error cargando carrito.</p>";
-            });
+            .catch(err => console.error("Error:", err));
     }
 
-    /* ---------------------------------------------------------
-       2. BOTONES (sumar, restar, eliminar)
-    -----------------------------------------------------------*/
-    function activarBotones() {
+    function renderizarProductos(carrito) {
+        listaCarrito.innerHTML = "";
+        let subtotalCalculado = 0;
 
-        // Eliminar producto
-        document.querySelectorAll(".btn-eliminar").forEach(btn => {
-            btn.removeEventListener("click", handlerEliminar); // evitar duplicados
-            btn.addEventListener("click", handlerEliminar);
+        carrito.forEach(p => {
+            const totalProducto = parseFloat(p.precio) * parseInt(p.cantidad);
+            subtotalCalculado += totalProducto;
+
+            const imgPath = p.imagen && p.imagen !== "" ? p.imagen : "../src/imagenes/logo.png";
+
+            listaCarrito.innerHTML += `
+                <div class="cart-item" data-id="${p.id}">
+                    <img src="${imgPath}" class="item-image" alt="Producto">
+                    <div class="item-details">
+                        <h2>${p.nombre}</h2>
+                        <p class="item-price">$${parseFloat(p.precio).toFixed(2)}</p>
+                        <button class="btn-eliminar remove-btn">Eliminar</button>
+                    </div>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn btn-restar">-</button>
+                        <span class="quantity">${p.cantidad}</span>
+                        <button class="quantity-btn btn-sumar">+</button>
+                    </div>
+                </div>
+            `;
         });
 
-        // Sumar
+        actualizarTotales(subtotalCalculado);
+        asignarEventosItems();
+    }
+
+    function actualizarTotales(subtotal) {
+        subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+        const envio = 40.00;
+        envioElem.textContent = `$${envio.toFixed(2)}`;
+        const total = subtotal + envio;
+        totalElem.textContent = `$${total.toFixed(2)}`;
+    }
+
+    function asignarEventosItems() {
         document.querySelectorAll(".btn-sumar").forEach(btn => {
-            btn.removeEventListener("click", handlerSumar);
-            btn.addEventListener("click", handlerSumar);
+            btn.onclick = (e) => modificarCantidad(e, 1);
         });
-
-        // Restar
         document.querySelectorAll(".btn-restar").forEach(btn => {
-            btn.removeEventListener("click", handlerRestar);
-            btn.addEventListener("click", handlerRestar);
+            btn.onclick = (e) => modificarCantidad(e, -1);
+        });
+        document.querySelectorAll(".btn-eliminar").forEach(btn => {
+            btn.onclick = (e) => eliminarProducto(e);
         });
     }
 
-    function handlerEliminar(e) {
+    function modificarCantidad(e, cambio) {
         const id = e.target.closest(".cart-item").dataset.id;
-        // confirmación opcional
-        if (!confirm("¿Eliminar este producto del carrito?")) return;
-        eliminarProducto(id);
+        const cantidadActual = parseInt(e.target.parentElement.querySelector(".quantity").textContent);
+        const nuevaCantidad = cantidadActual + cambio;
+
+        if (nuevaCantidad < 1) return;
+
+        enviarActualizacion("update", id, nuevaCantidad);
     }
 
-    function handlerSumar(e) {
-        const card = e.target.closest(".cart-item");
-        const id = card.dataset.id;
-        const cantidad = parseInt(card.querySelector(".quantity").textContent) + 1;
-        actualizarCantidad(id, cantidad);
-    }
-
-    function handlerRestar(e) {
-        const card = e.target.closest(".cart-item");
-        const id = card.dataset.id;
-        let cantidad = parseInt(card.querySelector(".quantity").textContent) - 1;
-        if (cantidad <= 0) {
-            // confirmar eliminación si llega a 0
-            if (!confirm("La cantidad llegará a 0. ¿Eliminar producto?")) return;
-            eliminarProducto(id);
-            return;
-        }
-        actualizarCantidad(id, cantidad);
-    }
-
-    /* ---------------------------------------------------------
-       3. UPDATE CANTIDAD
-    -----------------------------------------------------------*/
-    function actualizarCantidad(id, cantidad) {
-        fetch("carrito_crud.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "update",
-                id_producto: id,
-                cantidad: cantidad
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (!data || !data.success) {
-                    mostrarAlerta(data?.message || "No se pudo actualizar la cantidad", "danger");
-                    return;
-                }
-                cargarCarrito();
-            })
-            .catch(err => {
-                console.error("Error actualizar cantidad:", err);
-                mostrarAlerta("Error de red al actualizar", "danger");
-            });
-    }
-
-    /* ---------------------------------------------------------
-       4. ELIMINAR PRODUCTO
-    -----------------------------------------------------------*/
-    function eliminarProducto(id) {
-        fetch("carrito_crud.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "delete",
-                id_producto: id
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.success) {
-                    mostrarAlerta(data.message || "Producto eliminado", "danger");
-                } else {
-                    mostrarAlerta(data?.message || "No se pudo eliminar", "danger");
-                }
-                cargarCarrito();
-            })
-            .catch(err => {
-                console.error("Error eliminando producto:", err);
-                mostrarAlerta("Error eliminando producto", "danger");
-            });
-    }
-
-    /* ---------------------------------------------------------
-       5. UTIL: mostrar alerta con bootstrap fade
-    -----------------------------------------------------------*/
-    function mostrarAlerta(msg, tipo = "success") {
-        const alerta = document.getElementById("alerta");
-        if (!alerta) {
-            console.warn("No existe #alerta en el DOM");
-            return;
-        }
-
-        // Forzar texto y clases bootstrap
-        alerta.textContent = msg;
-        alerta.className = `alert alert-${tipo} fade show`;
-        alerta.style.display = "block";
-
-        // Ocultar después de 2s con animación
-        setTimeout(() => {
-            alerta.classList.remove("show");
-            setTimeout(() => alerta.style.display = "none", 300);
-        }, 2000);
-    }
-
-    /* ---------------------------------------------------------
-       6. UTIL: escape para texto mostrado
-    -----------------------------------------------------------*/
-    function escapeHtml(text) {
-        if (!text) return "";
-        return text.replace(/[&<>"']/g, function (m) {
-            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+    function eliminarProducto(e) {
+        const id = e.target.closest(".cart-item").dataset.id;
+        Swal.fire({
+            title: '¿Eliminar?',
+            text: "El producto será removido del carrito.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                enviarActualizacion("delete", id);
+            }
         });
     }
 
+    function enviarActualizacion(action, id, cantidad = 0) {
+        fetch("carrito_crud.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action, id_producto: id, cantidad })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) cargarCarrito();
+            });
+    }
 });

@@ -1,82 +1,148 @@
 <?php
+require_once 'conexion.php';
 session_start();
 header('Content-Type: application/json');
-require_once "conexion.php"; // Para obtener los datos del producto real
 
-// Recibir JSON o parámetros GET
-$inputJSON = file_get_contents("php://input");
-$input = json_decode($inputJSON, true);
-
+// Leer entrada JSON o GET
+$input = json_decode(file_get_contents("php://input"), true);
 $action = $input['action'] ?? ($_GET['action'] ?? null);
 $id_producto = $input['id_producto'] ?? null;
 $cantidad = $input['cantidad'] ?? 1;
 
-// Inicializar carrito
-if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
-}
+// Verificar si el usuario está logueado
+$usuario_logueado = isset($_SESSION['user_id']);
+$id_cliente = $usuario_logueado ? $_SESSION['user_id'] : null;
 
-/* ------------------------- 1. AGREGAR -------------------------- */
+// Inicializar carrito de sesión si no existe
+if (!isset($_SESSION['carrito'])) $_SESSION['carrito'] = [];
+
+// =======================================================================
+// 1. AGREGAR PRODUCTO
+// =======================================================================
 if ($action === "add") {
+    if (!$id_producto) { echo json_encode(["success" => false, "message" => "ID faltante"]); exit; }
 
-    if (!$id_producto) {
-        echo json_encode(["success" => false, "message" => "ID no recibido"]);
-        exit;
-    }
-
-    if (isset($_SESSION['carrito'][$id_producto])) {
-        $_SESSION['carrito'][$id_producto] += $cantidad;
+    if ($usuario_logueado) {
+        // --- MODO BASE DE DATOS ---
+        $stmt = mysqli_prepare($conexion, "SELECT cantidad FROM carrito_compras WHERE id_cliente = ? AND id_producto = ?");
+        mysqli_stmt_bind_param($stmt, "ii", $id_cliente, $id_producto);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        
+        if ($row = mysqli_fetch_assoc($res)) {
+            $nueva_cant = $row['cantidad'] + $cantidad;
+            $stmt_upd = mysqli_prepare($conexion, "UPDATE carrito_compras SET cantidad = ? WHERE id_cliente = ? AND id_producto = ?");
+            mysqli_stmt_bind_param($stmt_upd, "iii", $nueva_cant, $id_cliente, $id_producto);
+            mysqli_stmt_execute($stmt_upd);
+        } else {
+            $stmt_ins = mysqli_prepare($conexion, "INSERT INTO carrito_compras (id_cliente, id_producto, cantidad) VALUES (?, ?, ?)");
+            mysqli_stmt_bind_param($stmt_ins, "iii", $id_cliente, $id_producto, $cantidad);
+            mysqli_stmt_execute($stmt_ins);
+        }
     } else {
-        $_SESSION['carrito'][$id_producto] = $cantidad;
+        // --- MODO SESIÓN ---
+        if (isset($_SESSION['carrito'][$id_producto])) {
+            $_SESSION['carrito'][$id_producto] += $cantidad;
+        } else {
+            $_SESSION['carrito'][$id_producto] = $cantidad;
+        }
     }
-
     echo json_encode(["success" => true, "message" => "Producto agregado"]);
     exit;
 }
 
-/* ------------------------- 2. OBTENER -------------------------- */
+// =======================================================================
+// 2. OBTENER CARRITO (GET) - AQUÍ ESTABA EL ERROR
+// =======================================================================
 if ($action === "get") {
-    $carrito = [];
+    $carrito_data = [];
 
-    foreach ($_SESSION['carrito'] as $id => $cant) {
-        $query = "SELECT id_producto, nombre, precio_unitario, imagen FROM producto WHERE id_producto = $id";
+    if ($usuario_logueado) {
+        // --- CORRECCIÓN: Eliminamos 'p.imagen_url' de la consulta ---
+        $query = "SELECT p.id_producto, p.nombre, p.precio_unitario, p.descuento_porcentaje, c.cantidad 
+                  FROM carrito_compras c
+                  INNER JOIN Producto p ON c.id_producto = p.id_producto
+                  WHERE c.id_cliente = $id_cliente";
         $res = mysqli_query($conexion, $query);
+    } else {
+        // --- MODO SESIÓN ---
+        if (empty($_SESSION['carrito'])) {
+            echo json_encode(["success" => true, "carrito" => []]);
+            exit;
+        }
+        $ids = implode(',', array_keys($_SESSION['carrito']));
+        // --- CORRECCIÓN: Eliminamos 'imagen_url' de la consulta ---
+        $query = "SELECT id_producto, nombre, precio_unitario, descuento_porcentaje FROM Producto WHERE id_producto IN ($ids)";
+        $res = mysqli_query($conexion, $query);
+    }
 
-        if ($res && mysqli_num_rows($res) > 0) {
-            $p = mysqli_fetch_assoc($res);
+    if ($res) {
+        while ($p = mysqli_fetch_assoc($res)) {
+            $cant = $usuario_logueado ? $p['cantidad'] : $_SESSION['carrito'][$p['id_producto']];
 
-            $carrito[] = [
+            // Calcular precio con descuento
+            $precio = $p['precio_unitario'];
+            if ($p['descuento_porcentaje'] > 0) {
+                $precio = $precio * (1 - ($p['descuento_porcentaje'] / 100));
+            }
+
+            $carrito_data[] = [
                 "id" => $p["id_producto"],
                 "nombre" => $p["nombre"],
-                "precio" => $p["precio_unitario"],
+                "precio" => $precio,
                 "cantidad" => $cant,
-                "imagen" => $p["imagen"] ?? "https://via.placeholder.com/100"
+                // --- CORRECCIÓN: Usamos siempre el logo por defecto ---
+                "imagen" => "../src/imagenes/logo.png"
             ];
         }
     }
-
-    echo json_encode(["success" => true, "carrito" => $carrito]);
+    echo json_encode(["success" => true, "carrito" => $carrito_data]);
     exit;
 }
 
-/* ------------------------- 3. ACTUALIZAR ---------------------- */
+// =======================================================================
+// 3. ACTUALIZAR CANTIDAD
+// =======================================================================
 if ($action === "update") {
-    if (!$id_producto) { echo json_encode(["success" => false]); exit; }
+    if (!$id_producto) exit(json_encode(["success" => false]));
 
-    $_SESSION['carrito'][$id_producto] = $cantidad;
+    if ($usuario_logueado) {
+        if ($cantidad > 0) {
+            $stmt = mysqli_prepare($conexion, "UPDATE carrito_compras SET cantidad = ? WHERE id_cliente = ? AND id_producto = ?");
+            mysqli_stmt_bind_param($stmt, "iii", $cantidad, $id_cliente, $id_producto);
+            mysqli_stmt_execute($stmt);
+        } else {
+            $stmt = mysqli_prepare($conexion, "DELETE FROM carrito_compras WHERE id_cliente = ? AND id_producto = ?");
+            mysqli_stmt_bind_param($stmt, "ii", $id_cliente, $id_producto);
+            mysqli_stmt_execute($stmt);
+        }
+    } else {
+        if ($cantidad > 0) {
+            $_SESSION['carrito'][$id_producto] = $cantidad;
+        } else {
+            unset($_SESSION['carrito'][$id_producto]);
+        }
+    }
     echo json_encode(["success" => true]);
     exit;
 }
 
-/* ------------------------- 4. ELIMINAR ------------------------ */
+// =======================================================================
+// 4. ELIMINAR PRODUCTO
+// =======================================================================
 if ($action === "delete") {
-    if (!$id_producto) { echo json_encode(["success" => false]); exit; }
+    if (!$id_producto) exit(json_encode(["success" => false]));
 
-    unset($_SESSION['carrito'][$id_producto]);
+    if ($usuario_logueado) {
+        $stmt = mysqli_prepare($conexion, "DELETE FROM carrito_compras WHERE id_cliente = ? AND id_producto = ?");
+        mysqli_stmt_bind_param($stmt, "ii", $id_cliente, $id_producto);
+        mysqli_stmt_execute($stmt);
+    } else {
+        unset($_SESSION['carrito'][$id_producto]);
+    }
     echo json_encode(["success" => true]);
     exit;
 }
 
-/* ------------------------ SI NO COINCIDE ---------------------- */
 echo json_encode(["success" => false, "message" => "Acción inválida"]);
-exit;
+?>
