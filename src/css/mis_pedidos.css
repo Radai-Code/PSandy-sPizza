@@ -1,0 +1,184 @@
+/* ------------------------------
+   ESTILOS GENERALES
+------------------------------ */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.titulo {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #005a2e;
+    margin-top: 30px;
+}
+
+
+/* ------------------------------
+   CONTENEDOR GENERAL
+------------------------------ */
+
+.pedidos-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+
+/* ------------------------------
+   TARJETA DE PEDIDO
+------------------------------ */
+
+.pedido-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: transform .2s;
+    border-left: 8px solid #005a2e;
+}
+
+.pedido-card:hover {
+    transform: translateY(-4px);
+}
+
+
+/* ------------------------------
+   ENCABEZADO DEL PEDIDO
+------------------------------ */
+
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.pedido-id {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #005a2e;
+}
+
+
+/* ------------------------------
+   ESTADO DEL PEDIDO
+------------------------------ */
+
+.estado {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+.estado-pendiente {
+    background: #ffb703;
+    color: #000;
+}
+
+.estado-proceso {
+    background: #005a2e;
+}
+
+.estado-entregado {
+    background: #009e52;
+}
+
+
+/* ------------------------------
+   INFORMACIÓN DEL PEDIDO
+------------------------------ */
+
+.pedido-info p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+
+/* ------------------------------
+   LISTA DE PRODUCTOS
+------------------------------ */
+
+.productos-lista {
+    list-style: none;
+    padding: 0;
+    margin-top: 14px;
+}
+
+.productos-lista li {
+    padding: 8px 12px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+
+/* ------------------------------
+   TOTAL DEL PEDIDO
+------------------------------ */
+
+.total {
+    margin-top: 18px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: right;
+    color: #005a2e;
+}
+
+
+/* ------------------------------
+   SIN PEDIDOS
+------------------------------ */
+
+.sin-pedidos {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #777;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* BOTÓN "Mis pedidos" */
+.btn-mis-pedidos {
+    display: inline-block;
+    padding: 12px 22px;
+    background-color: #005a2e;
+    /* Verde */
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 10px;
+    /* Bordes redondeados */
+    transition: 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    font-size: 16px;
+}
+
+/* Hover */
+.btn-mis-pedidos:hover {
+    background-color: #ffb703;
+    /* Amarillo */
+    color: black;
+    transform: translateY(-3px);
+    /* efecto de elevación */
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* Click */
+.btn-mis-pedidos:active {
+    transform: scale(0.95);
+}

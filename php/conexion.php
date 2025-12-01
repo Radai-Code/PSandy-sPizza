@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 
 $servidor = '127.0.0.1';
 $usuario_db = 'root';
-$contrasena_db = 'mareli19';
+$contrasena_db = '';
 $nombre_db = 'ProyectoSandys';
 
 // Crear la conexión con la base de datos

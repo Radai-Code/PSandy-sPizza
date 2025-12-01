@@ -352,3 +352,25 @@ body {
 .btn-login-para-pedir:hover {
     background-color: #e0e0e0;
 }
+
+.btn-agregar-carrito {
+    margin-top: 8px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    background: #ffb703;
+    color: #000;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-agregar-carrito:hover {
+    background: #ffaa00;
+}
+
+.btn-mis-pedidos {
+
+    color: #000;
+
+}

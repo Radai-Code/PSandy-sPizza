@@ -27,8 +27,8 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
     <header class="menu-header">
         <a href="index.html" class="brand-logo">Sandy's Pizzas</a>
         <nav class="main-nav">
-            <a href="carrito.html" class="cart-link">🛒 Mi Carrito</a>
-            
+            <a href="../php/carrito.php" class="cart-link">🛒 Mi Carrito</a>
+             <a href="../php/pedidos/mis_pedidos.php" class="btn-mis-pedidos">Mis pedidos</a>
             <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="user-profile">
                     <span>Hola, <?php echo htmlspecialchars($_SESSION['user_nombre']); ?></span>
@@ -90,6 +90,12 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
                             data-stock="<?php echo $producto['stock']; ?>">
                         Pedir Ahora
                     </button>
+                    <button type="button" class="btn-agregar-carrito"
+                      onclick="agregarAlCarrito(<?php echo $producto['id_producto']; ?>)">
+                        🛒 Agregar al Carrito
+                    </button>
+                   
+
                 <?php else: ?>
                     <a href="login.html" class="add-to-cart-btn btn-login-para-pedir">
                         Inicia sesión para Pedir

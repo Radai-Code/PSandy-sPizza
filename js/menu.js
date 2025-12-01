@@ -1,35 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- LÓGICA DE FILTROS ---
+    // --- FILTROS ---
     const filterButtons = document.querySelectorAll('.filter-btn');
     const productCards = document.querySelectorAll('.product-card');
 
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Obtener la categoría del botón
             const category = button.dataset.filter;
-
-            // Actualizar el botón activo
             filterButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-
-            // Filtrar las tarjetas de producto
             productCards.forEach(card => {
                 const cardCategory = card.dataset.category;
-
-                if (category === 'todos' || category === cardCategory) {
-                    card.style.display = 'flex'; // 'flex' porque las tarjetas usan flexbox
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = (category === 'todos' || category === cardCategory) ? 'flex' : 'none';
             });
         });
     });
 
-    // --- LÓGICA PARA EL MODAL DE PEDIDO DIRECTO ---
+    // --- MODAL PEDIDO DIRECTO ---
     const modalPedido = document.getElementById("modal-pedido-directo");
-
-    // Es posible que el modal no exista si el usuario no ha iniciado sesión
     if (modalPedido) {
         const modalNombre = document.getElementById("modal-producto-nombre");
         const modalPrecio = document.getElementById("modal-producto-precio");
@@ -64,8 +52,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formPedidoDirecto.addEventListener("submit", (e) => {
             e.preventDefault();
-            // alert("Función de pedido directo aún no implementada.");
             modalPedido.style.display = "none";
+            Swal.fire({
+                icon: 'success',
+                title: 'Pedido confirmado',
+                text: 'Tu pedido ha sido registrado correctamente.',
+                timer: 1800,
+                showConfirmButton: false
+            });
         });
     }
-}); 
+
+    // --- AGREGAR AL CARRITO ---
+    window.agregarAlCarrito = function (idProducto) {
+        fetch('../php/carrito_crud.php', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "add",
+                id_producto: idProducto,
+                cantidad: 1
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Producto agregado',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al agregar al carrito:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo agregar el producto al carrito'
+                });
+            });
+    }
+
+});
