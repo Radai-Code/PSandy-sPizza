@@ -6,13 +6,14 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     exit('Acceso no permitido');
 }
 
-$email_form = $_POST['email']; 
-$contrasena_form = $_POST['password'];
+// Limpiamos los datos recibidos
+$email_form = trim($_POST['email']); 
+$contrasena_form = trim($_POST['password']);
 
-// Buscar usuario admin usando email o gmail
-$sql = "SELECT id_empleado, nombre, contrasena 
+// Consulta preparada
+$sql = "SELECT id_empleado, nombre, contrasena, rol 
         FROM empleado 
-        WHERE (email = ? OR gmail = ?) AND rol = 'admin'";
+        WHERE email = ? OR gmail = ?";
 
 $stmt = mysqli_prepare($conexion, $sql);
 
@@ -25,17 +26,38 @@ mysqli_stmt_execute($stmt);
 $resultado = mysqli_stmt_get_result($stmt);
 
 if ($fila = mysqli_fetch_assoc($resultado)) {
-    // Comparar con hash
+    
+    
+    // Verificamos la contraseña
     if (password_verify($contrasena_form, $fila['contrasena'])) {
-        $_SESSION['admin_id'] = $fila['id_empleado'];
-        $_SESSION['admin_usuario'] = $fila['nombre'];
-        header("Location: ../html/admin/dashboard.html");
+        
+        // Guardamos la sesión
+        $_SESSION['empleado_id'] = $fila['id_empleado'];
+        $_SESSION['empleado_nombre'] = $fila['nombre'];
+        $_SESSION['empleado_rol'] = strtolower(trim($fila['rol'])); // minúsculas y sin espacios
+        
+        // Redirección por rol
+        switch ($_SESSION['empleado_rol']) {
+            case 'admin':
+                header("Location: ../html/admin/dashboard.html");
+                break;
+            case 'empleado':
+                header("Location: ../html/empleado-productos.html");
+                break;
+            default:
+                // Rol desconocido
+                header("Location: ../html/admin/login-admin.html?error=4");
+                break;
+        }
         exit();
+        
     } else {
+        // Contraseña incorrecta
         header("Location: ../html/admin/login-admin.html?error=2");
         exit();
     }
 } else {
+    // Usuario no encontrado
     header("Location: ../html/admin/login-admin.html?error=3");
     exit();
 }
