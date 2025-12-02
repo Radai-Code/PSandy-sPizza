@@ -2,9 +2,15 @@
 // Asegúrate que la ruta a conexion.php sea correcta
 require_once '../conexion.php';
 
-// Iniciar sesión para verificar al admin
+// Iniciar sesión para verificar al admin/empleado
 session_start();
-if (!isset($_SESSION['admin_id'])) {
+// Se asume que el rol se guarda en $_SESSION['empleado_rol'] (establecido en verificar_admin.php)
+$rol_actual = strtolower(trim($_SESSION['empleado_rol'] ?? ''));
+$es_admin = ($rol_actual === 'admin');
+$es_empleado = ($rol_actual === 'empleado');
+$esta_logueado = $es_admin || $es_empleado;
+
+if (!$esta_logueado) {
     responderJson(['status' => 'error', 'message' => 'Acceso denegado. Inicia sesión.']);
 }
 
@@ -28,62 +34,64 @@ function responderTexto($mensaje) {
 }
 // --- Fin Funciones Helper ---
 
-// (Función manejarSubidaImagen ELIMINADA)
-
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $response = ['status' => 'error', 'message' => 'Acción no válida.'];
 
 switch($action) {
     case 'listar':
-        // CORREGIDO: Hacer JOIN para obtener el nombre de la clasificación
-        $sql = "SELECT p.*, c.nombre_clasificacion 
-                FROM Producto p 
-                LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion 
-                ORDER BY p.id_producto";
-        $query = mysqli_query($conexion, $sql);
-        if ($query) {
-            $productos = mysqli_fetch_all($query, MYSQLI_ASSOC);
-            responderJson($productos);
-        } else {
-            $response['message'] = 'Error al listar productos.';
-            responderJson($response);
-        }
-        break;
-
     case 'listar_clasificaciones':
-        // Esta acción es necesaria para el dropdown del modal
-        $query = mysqli_query($conexion, "SELECT id_clasificacion, nombre_clasificacion FROM Clasificacion ORDER BY nombre_clasificacion");
-        if ($query) {
-            $clasificaciones = mysqli_fetch_all($query, MYSQLI_ASSOC);
-            responderJson($clasificaciones);
-        } else {
-            $response['message'] = 'Error al listar clasificaciones.';
-            responderJson($response);
-        }
-        break;
-
     case 'obtener':
-        $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
-        if ($id) {
-            $stmt = mysqli_prepare($conexion, "SELECT * FROM Producto WHERE id_producto = ?");
-            mysqli_stmt_bind_param($stmt, "i", $id);
-            mysqli_stmt_execute($stmt);
-            $resultado = mysqli_stmt_get_result($stmt);
-            $producto = mysqli_fetch_assoc($resultado);
-            mysqli_stmt_close($stmt);
-            if ($producto) {
-                responderJson($producto);
+        // ACCIONES DE LECTURA (Permitidas para ambos: Admin y Empleado)
+        if ($action === 'listar') {
+            $sql = "SELECT p.*, c.nombre_clasificacion 
+                    FROM Producto p 
+                    LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion 
+                    ORDER BY p.id_producto";
+            $query = mysqli_query($conexion, $sql);
+            if ($query) {
+                $productos = mysqli_fetch_all($query, MYSQLI_ASSOC);
+                responderJson($productos);
             } else {
-                $response['message'] = 'Producto no encontrado.';
+                $response['message'] = 'Error al listar productos.';
                 responderJson($response);
             }
-        } else {
-             $response['message'] = 'ID de producto inválido para obtener.';
-             responderJson($response);
+        } elseif ($action === 'listar_clasificaciones') {
+            $query = mysqli_query($conexion, "SELECT id_clasificacion, nombre_clasificacion FROM Clasificacion ORDER BY nombre_clasificacion");
+            if ($query) {
+                $clasificaciones = mysqli_fetch_all($query, MYSQLI_ASSOC);
+                responderJson($clasificaciones);
+            } else {
+                $response['message'] = 'Error al listar clasificaciones.';
+                responderJson($response);
+            }
+        } elseif ($action === 'obtener') {
+            $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
+            if ($id) {
+                $stmt = mysqli_prepare($conexion, "SELECT * FROM Producto WHERE id_producto = ?");
+                mysqli_stmt_bind_param($stmt, "i", $id);
+                mysqli_stmt_execute($stmt);
+                $resultado = mysqli_stmt_get_result($stmt);
+                $producto = mysqli_fetch_assoc($resultado);
+                mysqli_stmt_close($stmt);
+                if ($producto) {
+                    responderJson($producto);
+                } else {
+                    $response['message'] = 'Producto no encontrado.';
+                    responderJson($response);
+                }
+            } else {
+                 $response['message'] = 'ID de producto inválido para obtener.';
+                 responderJson($response);
+            }
         }
         break;
 
     case 'crear':
+        // ACCIÓN RESTRINGIDA (Solo Admin)
+        if (!$es_admin) {
+            responderTexto("❌ Acceso denegado. Solo Administrador puede crear productos.");
+        }
+        
         $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
         $precio = filter_input(INPUT_POST, 'precio_unitario', FILTER_VALIDATE_FLOAT);
@@ -95,9 +103,7 @@ switch($action) {
         if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
 
         if (!empty($nombre) && $precio !== false && !empty($tamano)) {
-            // CORREGIDO: Sin imagen_url
             $stmt = mysqli_prepare($conexion, "INSERT INTO Producto (nombre, descripcion, precio_unitario, tamaño, descuento_porcentaje, stock, id_clasificacion) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            // CORREGIDO: Sin 's' de imagen, 'i' de stock, 'i' de clasificacion
             mysqli_stmt_bind_param($stmt, "ssdsiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion);
 
             if (mysqli_stmt_execute($stmt)) {
@@ -112,6 +118,8 @@ switch($action) {
         break;
 
     case 'actualizar':
+        // ACCIÓN PERMITIDA (Admin y Empleado)
+        
         $id = filter_input(INPUT_POST, 'id_producto_hidden', FILTER_VALIDATE_INT);
         $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
@@ -124,9 +132,7 @@ switch($action) {
         if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
         
         if ($id && !empty($nombre) && $precio !== false && !empty($tamano)) {
-             // CORREGIDO: Sin imagen_url
              $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=?, stock=?, id_clasificacion=? WHERE id_producto=?");
-             // CORREGIDO: Sin 's' de imagen
              mysqli_stmt_bind_param($stmt, "ssdsiiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $id);
 
              if (mysqli_stmt_execute($stmt)) {
@@ -141,9 +147,13 @@ switch($action) {
         break;
 
     case 'eliminar':
+        // ACCIÓN RESTRINGIDA (Solo Admin)
+        if (!$es_admin) {
+             responderTexto("❌ Acceso denegado. Solo Administrador puede eliminar productos.");
+        }
+        
         $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
         if ($id) {
-            // CORREGIDO: No se borra imagen
             $stmt = mysqli_prepare($conexion, "DELETE FROM Producto WHERE id_producto=?");
             mysqli_stmt_bind_param($stmt, "i", $id);
             if (mysqli_stmt_execute($stmt)) {
