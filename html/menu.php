@@ -4,6 +4,7 @@ require_once '../php/conexion.php';
 session_start();
 
 // 2. CONSULTAR TODOS LOS PRODUCTOS
+// Asegúrate de seleccionar también 'imagen_url' (aunque p.* ya lo incluye)
 $sql_productos = "SELECT p.*, c.nombre_clasificacion 
                   FROM Producto p
                   LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion
@@ -58,9 +59,27 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
             if ($resultado_productos && mysqli_num_rows($resultado_productos) > 0):
                 while ($producto = mysqli_fetch_assoc($resultado_productos)):
                     $categoria_filtro = strtolower($producto['nombre_clasificacion'] ?? 'otros');
+                    
+                    // --- LÓGICA DE LA IMAGEN ---
+                    $imagen = $producto['imagen_url'];
+                    
+                    // Si no hay imagen, usamos el logo por defecto
+                    if (empty($imagen)) {
+                        $ruta_final_imagen = "../src/imagenes/logo.png";
+                    } else {
+                        // CORRECCIÓN DE RUTA:
+                        // La BD guarda "../../src/..." (ruta desde php/admin/)
+                        // Pero menu.php está en html/, así que necesitamos "../src/..."
+                        $ruta_final_imagen = str_replace('../../src', '../src', $imagen);
+                    }
             ?>
             
             <div class="product-card" data-category="<?php echo htmlspecialchars($categoria_filtro); ?>">
+                
+                <img src="<?php echo htmlspecialchars($ruta_final_imagen); ?>" 
+                     alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
+                     class="product-image">
+
                 <div class="product-info">
                     <h2><?php echo htmlspecialchars($producto['nombre']); ?></h2>
                     <p><?php echo htmlspecialchars($producto['descripcion']); ?></p>
@@ -114,7 +133,6 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
         </div>
     </main>
 
-    <!-- MODAL -->
     <div id="modal-pedido-directo" class="modal-pedido">
         <div class="modal-pedido-content">
             <span class="close-pedido-modal">&times;</span>
@@ -151,7 +169,6 @@ $resultado_productos = mysqli_query($conexion, $sql_productos);
 
     <script src="../js/menu.js"></script>
 
-    <!-- Confirmación de pedido con diseño minimalista -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const formPedido = document.getElementById("form-pedido-directo");
