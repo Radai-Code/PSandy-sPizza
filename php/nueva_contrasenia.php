@@ -11,8 +11,8 @@ if (empty($email)) {
 <head>
     <meta charset="UTF-8">
     <title>Nueva Contraseña</title>
-    <link rel="stylesheet" href="/PSandy-sPizza/src/css/recuperarContrasenia.css">
-    <link rel="icon" type="image/png" href="/PSandy-sPizza/src/imagenes/logo.png">
+    <link rel="stylesheet" href="../src/css/recuperarContrasenia.css">
+    <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
 </head>
 <body>
     <div class="login-wrapper">
@@ -22,7 +22,7 @@ if (empty($email)) {
                 <h1>Nueva Contraseña</h1>
                 <p class="subtitle">Establece una nueva contraseña para <strong><?php echo $email; ?></strong></p>
 
-                <form action="/PSandy-sPizza/php/actualizar_Contrasenia.php" method="post">
+                <form action="actualizar_contrasenia.php" method="post">
                     <input type="hidden" name="email" value="<?php echo $email; ?>">
                     <input type="hidden" name="user_type" value="<?php echo $user_type; ?>">
 
@@ -34,9 +34,9 @@ if (empty($email)) {
 
                 <div class="helper-links">
                     <?php if ($user_type === 'admin'): ?>
-                        <p><a href="/PSandy-sPizza/html/admin/login-admin.html">Volver a Iniciar Sesión</a></p>
+                        <p><a href="../html/admin/login-admin.html">Volver a Iniciar Sesión</a></p>
                     <?php else: ?>
-                        <p><a href="/PSandy-sPizza/html/client-login.html">Volver a Iniciar Sesión</a></p>
+                        <p><a href="../html/client-login.html">Volver a Iniciar Sesión</a></p>
                     <?php endif; ?>
                 </div>
             </div>

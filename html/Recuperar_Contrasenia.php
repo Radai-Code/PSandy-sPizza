@@ -1,5 +1,5 @@
 <?php
-// Obtener tipo de usuario desde la URL
+// Obtener tipo de usuario desde la URL (NO AGREGUES 'require_once conexion.php' AQUÍ)
 $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
 ?>
 <!DOCTYPE html>
@@ -7,7 +7,7 @@ $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
 <head>
     <meta charset="UTF-8">
     <title>Recuperar Contraseña</title>
-    <link rel="stylesheet" href="/PSandy-sPizza/src/css/recuperarContrasenia.css">
+    <link rel="stylesheet" href="../src/css/recuperarContrasenia.css">
     <link rel="icon" type="image/png" href="../src/imagenes/logo.png">
 </head>
 <body>
@@ -36,7 +36,7 @@ $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
                     </div>
                 <?php endif; ?>
 
-                <form action="/PSandy-sPizza/php/verificar_email.php" method="post">
+                <form action="../php/verificar_email.php" method="post">
                     <input type="email" name="email" placeholder="Correo" required>
                     <input type="hidden" name="user_type" value="<?php echo $user_type; ?>">
                     <button type="submit">Enviar</button>
@@ -44,9 +44,9 @@ $user_type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'client';
 
                 <div class="helper-links">
                     <?php if ($user_type === 'admin'): ?>
-                        <p><a href="/PSandy-sPizza/html/admin/login-admin.html">Volver a Iniciar Sesión</a></p>
+                        <p><a href="admin/login-admin.html">Volver a Iniciar Sesión</a></p>
                     <?php else: ?>
-                        <p><a href="/PSandy-sPizza/html/client-login.html">Volver a Iniciar Sesión</a></p>
+                        <p><a href="client-login.html">Volver a Iniciar Sesión</a></p>
                     <?php endif; ?>
                 </div>
             </div>
