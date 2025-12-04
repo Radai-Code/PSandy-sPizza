@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(modal);
 
     // --- Referencias a Elementos del Modal ---
-    const modalContent = modal.querySelector(".modal-content");
     const closeModalButton = modal.querySelector(".close-button");
     const cancelModalButton = modal.querySelector(".btn-cancelar");
     const productoForm = document.getElementById("producto-form");
@@ -24,27 +23,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoClasificacionSelect = document.getElementById("producto-clasificacion");
 
     // --- Funciones para Abrir/Cerrar Modal ---
+    function clearFormFields() {
+        productoIdInput.value = "";
+        productoNombreInput.value = "";
+        productoDescripcionInput.value = "";
+        productoPrecioInput.value = "";
+        productoDescuentoInput.value = "";
+        productoStockInput.value = "";
+        productoTamanoSelect.value = "";
+        productoClasificacionSelect.value = "";
+    }
+
     function abrirModal() { modal.style.display = "block"; }
-    function cerrarModal() { modal.style.display = "none"; productoForm.reset(); }
+    function cerrarModal() {
+        modal.style.display = "none";
+        clearFormFields();
+    }
 
     // --- Eventos del Modal ---
     closeModalButton.addEventListener("click", cerrarModal);
     cancelModalButton.addEventListener("click", cerrarModal);
     modal.addEventListener("click", (event) => { if (event.target === modal) cerrarModal(); });
-    btnAgregar.addEventListener("click", () => {
-        productoIdInput.value = "";
-        modalTitle.textContent = "Agregar Producto";
-        abrirModal();
-    });
+
+    // Ocultar botón Agregar
+    if (btnAgregar) {
+        btnAgregar.style.display = 'none';
+    }
 
     // --- Carga Inicial ---
-    cargarProductos();
     cargarClasificaciones();
+    cargarProductos();
 
     // --- Funciones Asíncronas ---
     async function cargarProductos() {
         try {
-            const response = await fetch("../../php/admin/productos_crud.php?action=listar");
+            const response = await fetch("/PSandy-sPizza/php/admin/productos_crud.php?action=listar");
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const productos = await response.json();
 
@@ -54,9 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 const precioOrig = parseFloat(p.precio_unitario || 0);
                 const descuento = parseInt(p.descuento_porcentaje || 0);
                 let precioHtml = '';
+
                 if (descuento > 0) {
                     const precioNuevo = precioOrig * (1 - (descuento / 100));
-                    precioHtml = `<span class="precio-original">$${precioOrig.toFixed(2)}</span> <span class="precio-descuento">$${precioNuevo.toFixed(2)}</span>`;
+                    precioHtml = `<span class="precio-original" style="text-decoration: line-through; color: #888;">$${precioOrig.toFixed(2)}</span> <span class="precio-descuento" style="font-weight: 700;">$${precioNuevo.toFixed(2)}</span>`;
                 } else {
                     precioHtml = `<span>$${precioOrig.toFixed(2)}</span>`;
                 }
@@ -73,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>
                         <button class="btn-action btn-edit" data-id="${p.id_producto}">Editar</button>
                         <button class="btn-action btn-view" data-id="${p.id_producto}">Visualizar</button>
-                        <button class="btn-action btn-delete" data-id="${p.id_producto}">Eliminar</button>
+                        <button class="btn-action btn-delete" data-id="${p.id_producto}" style="display: none;">Eliminar</button>
                     </td>
                 `;
                 tablaBody.appendChild(tr);
@@ -87,11 +101,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function cargarClasificaciones() {
         try {
-            const response = await fetch("../../php/admin/productos_crud.php?action=listar_clasificaciones");
+            const response = await fetch("/PSandy-sPizza/php/admin/productos_crud.php?action=listar_clasificaciones");
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const clasificaciones = await response.json();
 
             productoClasificacionSelect.innerHTML = '<option value="">Selecciona...</option>';
+            if (clasificaciones.length === 0) productoClasificacionSelect.innerHTML += '<option value="" disabled>No hay clasificaciones en la BD</option>';
+
             clasificaciones.forEach(c => {
                 const option = document.createElement("option");
                 option.value = c.id_clasificacion;
@@ -112,10 +128,24 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("action", action);
         formData.append("id_producto", id);
 
+        if (action === "crear") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permiso Denegado',
+                text: 'Solo los administradores pueden crear nuevos productos.',
+            });
+            return;
+        }
+
         try {
-            const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
+            const response = await fetch("/PSandy-sPizza/php/admin/productos_crud.php", { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const respuesta = await response.text();
+
+            if (respuesta.includes("❌ Error") || respuesta.includes("Acceso denegado")) {
+                Swal.fire({ icon: 'error', title: 'Error de Servidor', text: respuesta });
+                return;
+            }
 
             Swal.fire({
                 icon: 'success',
@@ -131,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(`Error al ${action} producto:`, error);
             Swal.fire({
                 icon: 'error',
-                title: 'Error',
+                title: 'Error de Conexión',
                 text: `Error: ${error.message}`,
             });
         }
@@ -155,11 +185,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function handleEditClick(event) {
         const id = event.target.dataset.id;
+        clearFormFields();
+
         try {
             const formData = new FormData();
             formData.append("action", "obtener");
             formData.append("id_producto", id);
-            const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
+            const response = await fetch("/PSandy-sPizza/php/admin/productos_crud.php", { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const p = await response.json();
             if (p) {
@@ -191,47 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function handleDeleteClick(event) {
-        const id = event.target.dataset.id;
-
-        Swal.fire({
-            title: `¿Eliminar producto ID ${id}?`,
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar",
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6"
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                const formData = new FormData();
-                formData.append("action", "eliminar");
-                formData.append("id_producto", id);
-
-                try {
-                    const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
-                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    const respuesta = await response.text();
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Eliminado',
-                        text: respuesta,
-                        timer: 1800,
-                        showConfirmButton: false
-                    });
-
-                    cargarProductos();
-                } catch (error) {
-                    console.error("Error al eliminar:", error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error al eliminar',
-                        text: error.message
-                    });
-                }
-            }
-        });
+        Swal.fire('Permiso Denegado', 'Solo los administradores pueden eliminar productos.', 'error');
     }
 
     async function handleViewClick(event) {
@@ -240,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new FormData();
             formData.append("action", "obtener");
             formData.append("id_producto", id);
-            const response = await fetch("../../php/admin/productos_crud.php", { method: "POST", body: formData });
+            const response = await fetch("/PSandy-sPizza/php/admin/productos_crud.php", { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const p = await response.json();
 

@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelModalButton = modal.querySelector(".btn-cancelar");
     const productoForm = document.getElementById("producto-form");
     const modalTitle = document.getElementById("modal-title");
+
+    // Inputs
     const productoIdInput = document.getElementById("producto-id");
     const productoNombreInput = document.getElementById("producto-nombre");
     const productoDescripcionInput = document.getElementById("producto-descripcion");
@@ -18,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoStockInput = document.getElementById("producto-stock");
     const productoTamanoSelect = document.getElementById("producto-tamano");
     const productoClasificacionSelect = document.getElementById("producto-clasificacion");
+
+    // Nuevos selectores para Imagen
+    const productoImagenInput = document.getElementById("producto-imagen"); // Asegúrate de tener este ID en tu HTML
+    const previewImagenDiv = document.getElementById("preview-imagen");     // Asegúrate de tener este ID en tu HTML
 
     // --- Funciones ---
     function clearFormFields() {
@@ -29,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
         productoStockInput.value = "";
         productoTamanoSelect.value = "";
         productoClasificacionSelect.value = "";
+
+        // Limpiar imagen
+        if (productoImagenInput) productoImagenInput.value = "";
+        if (previewImagenDiv) previewImagenDiv.innerHTML = "";
     }
 
     function abrirModal() { modal.style.display = "block"; }
@@ -60,13 +70,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 const tr = document.createElement("tr");
                 const precioOrig = parseFloat(p.precio_unitario || 0);
                 const descuento = parseInt(p.descuento_porcentaje || 0);
+
                 let precioHtml = descuento > 0
                     ? `<span class="precio-original" style="text-decoration: line-through; color: #888;">$${precioOrig.toFixed(2)}</span> 
                        <span class="precio-descuento" style="font-weight: 700;">$${(precioOrig * (1 - descuento / 100)).toFixed(2)}</span>`
                     : `<span>$${precioOrig.toFixed(2)}</span>`;
 
+                // URL de imagen por defecto si no existe
+                const imgUrl = p.imagen_url && p.imagen_url !== "" ? p.imagen_url : "../../src/imagenes/logo.png";
+
                 tr.innerHTML = `
                     <td>${p.id_producto}</td>
+                    <td><img src="${imgUrl}" alt="Prod" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
                     <td>${p.nombre || 'N/A'}</td>
                     <td>${p.descripcion || 'N/A'}</td>
                     <td>${precioHtml}</td>
@@ -85,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
             asignarListenersBotones();
         } catch (error) {
             console.error("Error cargando productos:", error);
-            tablaBody.innerHTML = `<tr><td colspan="9">Error al cargar: ${error.message}</td></tr>`;
+            tablaBody.innerHTML = `<tr><td colspan="10">Error al cargar: ${error.message}</td></tr>`;
         }
     }
 
@@ -177,8 +192,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 productoPrecioInput.value = p.precio_unitario || 0;
                 productoDescuentoInput.value = p.descuento_porcentaje || 0;
                 productoStockInput.value = p.stock || 0;
-                productoTamanoSelect.value = p.tamaño || "";
-                productoClasificacionSelect.value = p.id_clasificacion || "";
+
+                // Previsualizar Imagen
+                if (previewImagenDiv) {
+                    if (p.imagen_url) {
+                        previewImagenDiv.innerHTML = `<img src="${p.imagen_url}" style="width: 100px; margin-top: 10px; border-radius: 5px;">`;
+                    } else {
+                        previewImagenDiv.innerHTML = '<small style="color: #888;">Sin imagen actual</small>';
+                    }
+                }
+
+                // Esperar a que el navegador procese los selects
+                setTimeout(() => {
+                    productoTamanoSelect.value = p.tamaño || "";
+                    productoClasificacionSelect.value = p.id_clasificacion || "";
+                }, 0);
+
                 modalTitle.textContent = "Editar Producto";
                 abrirModal();
             } else {
@@ -201,16 +230,24 @@ document.addEventListener("DOMContentLoaded", () => {
             const p = await response.json();
 
             if (p) {
+                const imgHtml = p.imagen_url
+                    ? `<br><img src="${p.imagen_url}" style="width: 150px; border-radius: 8px; margin-bottom: 10px;">`
+                    : '';
+
                 Swal.fire({
                     title: p.nombre || "Producto sin nombre",
                     html: `
-                        <b>ID:</b> ${p.id_producto}<br>
-                        <b>Descripción:</b> ${p.descripcion || ''}<br>
-                        <b>Precio:</b> $${parseFloat(p.precio_unitario || 0).toFixed(2)}<br>
-                        <b>Descuento:</b> ${p.descuento_porcentaje || 0}%<br>
-                        <b>Stock:</b> ${p.stock || 0}<br>
-                        <b>Tamaño:</b> ${p.tamaño || ''}<br>
-                        <b>Clasificación:</b> ${p.id_clasificacion || ''}
+                        ${imgHtml}
+                        <br>
+                        <div style="text-align: left; margin-left: 20px;">
+                            <b>ID:</b> ${p.id_producto}<br>
+                            <b>Descripción:</b> ${p.descripcion || ''}<br>
+                            <b>Precio:</b> $${parseFloat(p.precio_unitario || 0).toFixed(2)}<br>
+                            <b>Descuento:</b> ${p.descuento_porcentaje || 0}%<br>
+                            <b>Stock:</b> ${p.stock || 0}<br>
+                            <b>Tamaño:</b> ${p.tamaño || ''}<br>
+                            <b>Clasificación:</b> ${p.id_clasificacion || ''}
+                        </div>
                     `,
                     icon: 'info'
                 });

@@ -4,7 +4,6 @@ require_once '../conexion.php';
 
 // Iniciar sesión para verificar al admin/empleado
 session_start();
-// Se asume que el rol se guarda en $_SESSION['empleado_rol'] (establecido en verificar_admin.php)
 $rol_actual = strtolower(trim($_SESSION['empleado_rol'] ?? ''));
 $es_admin = ($rol_actual === 'admin');
 $es_empleado = ($rol_actual === 'empleado');
@@ -25,12 +24,42 @@ function responderJson($data) {
     if ($conexion) mysqli_close($conexion);
     exit();
 }
+
 function responderTexto($mensaje) {
     global $conexion;
     header('Content-Type: text/plain');
     echo $mensaje;
     if ($conexion) mysqli_close($conexion);
     exit();
+}
+
+// --- Helper para Subir Imágenes ---
+function subirImagen($archivo) {
+    // Si no se subió archivo o hubo error, retornamos null
+    if (!isset($archivo) || $archivo['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+    
+    // Crear carpeta si no existe (ajusta la ruta según tu estructura de carpetas)
+    // Nota: ../../ sale de 'php/admin' hacia la raíz y entra a 'src/imagenes/productos'
+    $directorio_fisico = "../../src/imagenes/productos/";
+    if (!file_exists($directorio_fisico)) {
+        mkdir($directorio_fisico, 0777, true);
+    }
+
+    $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+    // Generar nombre único para evitar sobreescribir imágenes
+    $nombre_unico = uniqid('prod_', true) . "." . $extension;
+    $ruta_destino = $directorio_fisico . $nombre_unico;
+    
+    // Esta es la ruta que se guardará en la BD (relativa para el HTML)
+    // El HTML está en 'html/admin', así que bajamos a raiz y entramos a src
+    $ruta_bd = "../../src/imagenes/productos/" . $nombre_unico;
+
+    if (move_uploaded_file($archivo['tmp_name'], $ruta_destino)) {
+        return $ruta_bd;
+    }
+    return null;
 }
 // --- Fin Funciones Helper ---
 
@@ -39,50 +68,64 @@ $response = ['status' => 'error', 'message' => 'Acción no válida.'];
 
 switch($action) {
     case 'listar':
+        // Incluimos imagen_url en la selección
+        $sql = "SELECT p.*, c.nombre_clasificacion 
+                FROM Producto p 
+                LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion 
+                ORDER BY p.id_producto DESC";
+        $query = mysqli_query($conexion, $sql);
+        if ($query) {
+            $productos = mysqli_fetch_all($query, MYSQLI_ASSOC);
+            responderJson($productos);
+        } else {
+            $response['message'] = 'Error al listar productos.';
+            responderJson($response);
+        }
+        break;
+
     case 'listar_clasificaciones':
+        $query = mysqli_query($conexion, "SELECT id_clasificacion, nombre_clasificacion FROM Clasificacion ORDER BY nombre_clasificacion");
+        if ($query) {
+            $clasificaciones = mysqli_fetch_all($query, MYSQLI_ASSOC);
+            responderJson($clasificaciones);
+        } else {
+            $response['message'] = 'Error al listar clasificaciones.';
+            responderJson($response);
+        }
+        break;
+
     case 'obtener':
-        // ACCIONES DE LECTURA (Permitidas para ambos: Admin y Empleado)
-        if ($action === 'listar') {
-            $sql = "SELECT p.*, c.nombre_clasificacion 
-                    FROM Producto p 
-                    LEFT JOIN Clasificacion c ON p.id_clasificacion = c.id_clasificacion 
-                    ORDER BY p.id_producto";
-            $query = mysqli_query($conexion, $sql);
-            if ($query) {
-                $productos = mysqli_fetch_all($query, MYSQLI_ASSOC);
-                responderJson($productos);
+        $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
+        if ($id) {
+            // USAMOS COALESCE PARA EVITAR VALORES NULL QUE ROMPEN EL JS
+            $stmt = mysqli_prepare($conexion, "
+                SELECT 
+                    id_producto,
+                    COALESCE(nombre, '') as nombre,
+                    COALESCE(descripcion, '') as descripcion,
+                    COALESCE(precio_unitario, 0) as precio_unitario,
+                    COALESCE(tamaño, '') as tamaño,
+                    COALESCE(descuento_porcentaje, 0) as descuento_porcentaje,
+                    COALESCE(stock, 0) as stock,
+                    COALESCE(id_clasificacion, 0) as id_clasificacion,
+                    COALESCE(imagen_url, '') as imagen_url
+                FROM Producto WHERE id_producto = ?");
+            
+            mysqli_stmt_bind_param($stmt, "i", $id);
+            mysqli_stmt_execute($stmt);
+            $resultado = mysqli_stmt_get_result($stmt);
+            $producto = mysqli_fetch_assoc($resultado);
+            mysqli_stmt_close($stmt);
+            
+            if ($producto) {
+                responderJson($producto);
             } else {
-                $response['message'] = 'Error al listar productos.';
+                $response['message'] = 'Producto no encontrado.';
                 responderJson($response);
             }
-        } elseif ($action === 'listar_clasificaciones') {
-            $query = mysqli_query($conexion, "SELECT id_clasificacion, nombre_clasificacion FROM Clasificacion ORDER BY nombre_clasificacion");
-            if ($query) {
-                $clasificaciones = mysqli_fetch_all($query, MYSQLI_ASSOC);
-                responderJson($clasificaciones);
-            } else {
-                $response['message'] = 'Error al listar clasificaciones.';
-                responderJson($response);
-            }
-        } elseif ($action === 'obtener') {
-            $id = filter_input(INPUT_POST, 'id_producto', FILTER_VALIDATE_INT);
-            if ($id) {
-                $stmt = mysqli_prepare($conexion, "SELECT * FROM Producto WHERE id_producto = ?");
-                mysqli_stmt_bind_param($stmt, "i", $id);
-                mysqli_stmt_execute($stmt);
-                $resultado = mysqli_stmt_get_result($stmt);
-                $producto = mysqli_fetch_assoc($resultado);
-                mysqli_stmt_close($stmt);
-                if ($producto) {
-                    responderJson($producto);
-                } else {
-                    $response['message'] = 'Producto no encontrado.';
-                    responderJson($response);
-                }
-            } else {
-                 $response['message'] = 'ID de producto inválido para obtener.';
-                 responderJson($response);
-            }
+        } else {
+             $response['message'] = 'ID de producto inválido para obtener.';
+             responderJson($response);
         }
         break;
 
@@ -100,14 +143,18 @@ switch($action) {
         $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT) ?? 0;
         $clasificacion = filter_input(INPUT_POST, 'id_clasificacion', FILTER_VALIDATE_INT);
         
+        // Manejo de la imagen
+        $imagen_url = subirImagen($_FILES['imagen'] ?? null);
+        
         if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
 
         if (!empty($nombre) && $precio !== false && !empty($tamano)) {
-            $stmt = mysqli_prepare($conexion, "INSERT INTO Producto (nombre, descripcion, precio_unitario, tamaño, descuento_porcentaje, stock, id_clasificacion) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            mysqli_stmt_bind_param($stmt, "ssdsiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion);
+            // Insertamos incluyendo la columna imagen_url
+            $stmt = mysqli_prepare($conexion, "INSERT INTO Producto (nombre, descripcion, precio_unitario, tamaño, descuento_porcentaje, stock, id_clasificacion, imagen_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "ssdsiiis", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $imagen_url);
 
             if (mysqli_stmt_execute($stmt)) {
-                 responderTexto("✅ Producto agregado");
+                 responderTexto("✅ Producto agregado correctamente");
             } else {
                  responderTexto("❌ Error BD: " . mysqli_stmt_error($stmt));
             }
@@ -129,14 +176,24 @@ switch($action) {
         $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT) ?? 0;
         $clasificacion = filter_input(INPUT_POST, 'id_clasificacion', FILTER_VALIDATE_INT);
         
+        // Intentar subir nueva imagen
+        $nueva_imagen = subirImagen($_FILES['imagen'] ?? null);
+        
         if ($clasificacion === false || $clasificacion === 0) { $clasificacion = null; }
         
         if ($id && !empty($nombre) && $precio !== false && !empty($tamano)) {
-             $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=?, stock=?, id_clasificacion=? WHERE id_producto=?");
-             mysqli_stmt_bind_param($stmt, "ssdsiiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $id);
+             if ($nueva_imagen) {
+                 // Si se subió una nueva imagen, actualizamos también ese campo
+                 $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=?, stock=?, id_clasificacion=?, imagen_url=? WHERE id_producto=?");
+                 mysqli_stmt_bind_param($stmt, "ssdsiiisi", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $nueva_imagen, $id);
+             } else {
+                 // Si NO se subió imagen, mantenemos la anterior (no tocamos imagen_url)
+                 $stmt = mysqli_prepare($conexion, "UPDATE Producto SET nombre=?, descripcion=?, precio_unitario=?, tamaño=?, descuento_porcentaje=?, stock=?, id_clasificacion=? WHERE id_producto=?");
+                 mysqli_stmt_bind_param($stmt, "ssdsiiii", $nombre, $descripcion, $precio, $tamano, $descuento, $stock, $clasificacion, $id);
+             }
 
              if (mysqli_stmt_execute($stmt)) {
-                  responderTexto("✏️ Producto actualizado");
+                  responderTexto("✏️ Producto actualizado correctamente");
              } else {
                   responderTexto("❌ Error BD: " . mysqli_stmt_error($stmt));
              }
@@ -172,5 +229,4 @@ switch($action) {
         responderJson($response);
 }
 if ($conexion) { mysqli_close($conexion); }
-
 ?>
